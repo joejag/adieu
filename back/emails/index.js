@@ -132,6 +132,12 @@ const getMessage = (auth, id) => {
         } else if (textElement) {
           emailBody = textElement.body.data
           mimeType = 'text/plain'
+        } else {
+          // TODO: handle mult/alt thingy better
+          emailBody = res.data.payload.parts[0].parts.find(
+            (p) => p['mimeType'] === 'text/html'
+          ).body.data
+          mimeType = 'text/html'
         }
       } else {
         emailBody = res.data.payload.body.data
