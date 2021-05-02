@@ -5,7 +5,7 @@ const crypto = require('crypto')
 const oauth2Client = new google.auth.OAuth2(
   process.env.CLIENT_ID,
   process.env.CLIENT_SECRET,
-  'https://adieu.joejag.com/api/callback'
+  process.env.CLIENT_REDIRECT
 )
 
 exports.loginHandler = async function (event) {
@@ -30,11 +30,10 @@ exports.callbackHandler = async function (event) {
   const code = event.queryStringParameters.code
   const { tokens } = await oauth2Client.getToken(code)
 
-  console.log('gonna store', tokens)
-
-  // generate cookie id, store in dynamodb under it
+  // generate cookie id, stripping out nasty chars
   const cookieId = crypto.randomBytes(64).toString('base64').replace(/\W/g, '')
 
+  // save the auth tokens in Dynamo
   var docClient = new DynamoDB.DocumentClient()
   await docClient
     .put({
@@ -50,7 +49,7 @@ exports.callbackHandler = async function (event) {
     statusCode: 302,
     headers: {
       'Set-Cookie': `key=${cookieId}; Secure; HttpOnly; SameSite`,
-      Location: 'https://adieu.joejag.com',
+      Location: process.env.ADIEU_HOMEPAGE,
     },
   }
 }

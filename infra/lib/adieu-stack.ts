@@ -8,7 +8,7 @@ import * as lambda from '@aws-cdk/aws-lambda'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as s3deploy from '@aws-cdk/aws-s3-deployment'
 import * as dynamodb from '@aws-cdk/aws-dynamodb'
-import * as ssm from '@aws-cdk/aws-ssm'
+import { StringParameter } from '@aws-cdk/aws-ssm'
 
 export class AdieuAPIStack extends cdk.Stack {
   public readonly httpApi: apigw.HttpApi
@@ -16,15 +16,20 @@ export class AdieuAPIStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    const clientId = ssm.StringParameter.valueForStringParameter(
+    // Grab secrets from SSM, to pass to Lambdas
+    const clientId = StringParameter.valueForStringParameter(
       this,
-      'adieu-client-id'
+      '/adieu/client-id'
     )
-
-    const clientSecret = ssm.StringParameter.valueForStringParameter(
+    const clientSecret = StringParameter.valueForStringParameter(
       this,
-      'adieu-client-secret'
+      '/adieu/client-secret'
     )
+    const clientRedirect = StringParameter.valueForStringParameter(
+      this,
+      '/adieu/client-redirect-url'
+    )
+    const homepage = StringParameter.valueForStringParameter(this, '/adieu/url')
 
     const table = new dynamodb.Table(this, 'Sessions', {
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
@@ -34,11 +39,12 @@ export class AdieuAPIStack extends cdk.Stack {
     const login = new lambda.Function(this, 'LoginHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back'),
-      handler: 'login/login.loginHandler',
+      handler: 'login/index.loginHandler',
       timeout: Duration.seconds(30),
       environment: {
         CLIENT_ID: clientId,
         CLIENT_SECRET: clientSecret,
+        CLIENT_REDIRECT: clientRedirect,
         SESSIONS_TABLE_NAME: table.tableName,
       },
     })
@@ -47,17 +53,19 @@ export class AdieuAPIStack extends cdk.Stack {
     const callback = new lambda.Function(this, 'CallbackHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back'),
-      handler: 'login/login.callbackHandler',
+      handler: 'login/index.callbackHandler',
       timeout: Duration.seconds(30),
       environment: {
         CLIENT_ID: clientId,
         CLIENT_SECRET: clientSecret,
+        CLIENT_REDIRECT: clientRedirect,
+        ADIEU_HOMEPAGE: homepage,
         SESSIONS_TABLE_NAME: table.tableName,
       },
     })
     table.grantReadWriteData(callback)
 
-    const hello = new lambda.Function(this, 'EmailsHandler', {
+    const emails = new lambda.Function(this, 'EmailsHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back'),
       handler: 'emails/index.handler',
@@ -65,17 +73,18 @@ export class AdieuAPIStack extends cdk.Stack {
       environment: {
         CLIENT_ID: clientId,
         CLIENT_SECRET: clientSecret,
+        CLIENT_REDIRECT: clientRedirect,
         SESSIONS_TABLE_NAME: table.tableName,
       },
     })
-    table.grantReadWriteData(hello)
+    table.grantReadWriteData(emails)
 
     this.httpApi = new apigw.HttpApi(this, 'ApiGateway')
     this.httpApi.addRoutes({
       path: '/api/emails',
       methods: [apigw.HttpMethod.GET],
       integration: new LambdaProxyIntegration({
-        handler: hello,
+        handler: emails,
       }),
     })
 

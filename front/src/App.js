@@ -48,11 +48,11 @@ const App = () => {
   const [emails, setEmails] = React.useState([])
 
   React.useEffect(() => {
-    const url = 'https://adieu.joejag.com/api/emails'
+    const url = `${window.location.origin}/api/emails`
     fetch(url)
       .then((res) => {
         if (res.status === 401) {
-          window.location = 'https://adieu.joejag.com/api/login'
+          window.location = `${window.location.origin}/api/login`
           return []
         }
         return res.json()

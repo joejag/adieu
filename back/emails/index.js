@@ -1,6 +1,12 @@
 const { google } = require('googleapis')
 const { DynamoDB } = require('aws-sdk')
 
+const oauth2Client = new google.auth.OAuth2(
+  process.env.CLIENT_ID,
+  process.env.CLIENT_SECRET,
+  process.env.CLIENT_REDIRECT
+)
+
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -22,8 +28,6 @@ exports.handler = async (event) => {
     const sessionId = event.cookies[0].substring(4)
     const details = await go(sessionId)
 
-    console.log('woop, all is fine in the world')
-
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
@@ -44,12 +48,6 @@ exports.handler = async (event) => {
     }
   }
 }
-
-const oauth2Client = new google.auth.OAuth2(
-  process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
-  'https://adieu.joejag.com/api/callback'
-)
 
 const go = async (sessionId) => {
   const docClient = new DynamoDB.DocumentClient()
@@ -139,10 +137,6 @@ const getMessage = (auth, id) => {
         emailBody = res.data.payload.body.data
         mimeType = res.data.payload.mimeType
       }
-
-      // if (id === '1791bbe319b97c6a') {
-      //   console.log('k', mimeType, htmlContent)
-      // }
 
       return {
         id,

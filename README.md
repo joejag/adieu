@@ -1,15 +1,15 @@
 # Top things
 
-- Do auth properly with login
 - Group by category, or show if personal
   - Today,Yesterday, This Month, March, Feb, Jan, 2020
   - updates:orange
   - finance:green
   - promos:cyan
 - Keyboard shortcuts: up, down, open/close (done, undo)
+- Show unread/read status
 - Mark things as 'done'
 - mobile view
-- Threads
+- Show email threads together
 
 # Nice things - small effot
 
@@ -27,6 +27,7 @@
 - Create fancy cards for trips
 - spruce up emails, if style is missing add it (like Kent Dodds pre section)
 - Sleeping things
+- store OAuth redirect for all sessions rather than just the initial one
 
 # Probably never
 
@@ -45,5 +46,32 @@ Inbox:
 
 - https://cdn3.vox-cdn.com/assets/4435703/Screen3.png
 
-aws ssm put-parameter --name "adieu-client-id" --type "String" --value "CLIENT_ID"
-aws ssm put-parameter --name "adieu-client-secret" --type "String" --value "CLIENT_SECRET"
+## Secrets for SSM
+
+Create an API account at https://console.cloud.google.com/apis/credentials. Store the creds in AWS Systems Manager.
+
+```bash
+aws ssm put-parameter --cli-input-json '{
+  "Name": "/adieu/client-id",
+  "Value": "SOME ID",
+  "Type": "String"
+}'
+
+aws ssm put-parameter --cli-input-json '{
+  "Name": "/adieu/client-secret",
+  "Value": "SOME SECRET",
+  "Type": "String"
+}'
+
+aws ssm put-parameter --cli-input-json '{
+  "Name": "/adieu/client-redirect-url",
+  "Value": "https://adieu.joejag.com/api/callback",
+  "Type": "String"
+}'
+
+aws ssm put-parameter --cli-input-json '{
+  "Name": "/adieu/url",
+  "Value": "https://adieu.joejag.com",
+  "Type": "String"
+}'
+```
