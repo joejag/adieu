@@ -1,5 +1,6 @@
 # Top things
 
+- Fix local env. Fake the Lambda
 - Group by category, or show if personal
   - Today,Yesterday, This Month, March, Feb, Jan, 2020
   - updates:orange
