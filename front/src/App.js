@@ -8,17 +8,17 @@ import AccordionSummary from '@material-ui/core/AccordionSummary'
 import AccordionDetails from '@material-ui/core/AccordionDetails'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import Avatar from '@material-ui/core/Avatar'
-import { deepOrange } from '@material-ui/core/colors'
+import { lightBlue } from '@material-ui/core/colors'
 
 import FullheightIframe from './components/iframe'
-import {
-  within,
-  todayRange,
-  yesterdayRange,
-  monthRange,
-  beforeMonthRange,
-} from './core/sorter'
 import { splitter } from './core/splitter'
+import { bundled } from './core/bundler'
+import {
+  SocialSummary,
+  UpdatesSummary,
+  PromosSummary,
+  ForumSummary,
+} from './components/summaries'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,9 +31,9 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(2),
     marginLeft: theme.spacing(3.5),
   },
-  orange: {
-    color: theme.palette.getContrastText(deepOrange[500]),
-    backgroundColor: deepOrange[500],
+  personal: {
+    color: theme.palette.getContrastText(lightBlue[500]),
+    backgroundColor: lightBlue[500],
   },
   emailbody: {
     width: '100%',
@@ -60,7 +60,12 @@ const App = () => {
       })
       .then((res) => {
         const splitEmails = splitter(res)
-        setEmails(splitEmails)
+        const newSplit = splitEmails.map((period) => {
+          period.emails = bundled(period.emails)
+          return period
+        })
+
+        setEmails(newSplit)
       })
   }, [])
 
@@ -80,8 +85,35 @@ const App = () => {
             <Typography className={classes.dayLabel} variant="h5">
               {period.label}
             </Typography>
-            {period.emails.map((email) => (
-              <Emails key={email.id} item={email} />
+            {period.emails.map((bundle) => (
+              <div key={bundle.label}>
+                {bundle.label === 'personal' &&
+                  bundle.emails.map((e) => <Emails key={e.id} item={e} />)}
+                {bundle.label === 'social' && (
+                  <SocialSummary
+                    key={bundle.label}
+                    bundle={bundle}
+                  ></SocialSummary>
+                )}
+                {bundle.label === 'updates' && (
+                  <UpdatesSummary
+                    key={bundle.label}
+                    bundle={bundle}
+                  ></UpdatesSummary>
+                )}
+                {bundle.label === 'promos' && (
+                  <PromosSummary
+                    key={bundle.label}
+                    bundle={bundle}
+                  ></PromosSummary>
+                )}
+                {bundle.label === 'forum' && (
+                  <ForumSummary
+                    key={bundle.label}
+                    bundle={bundle}
+                  ></ForumSummary>
+                )}
+              </div>
             ))}
           </div>
         ))}
@@ -114,7 +146,7 @@ const Emails = ({ item }) => {
       >
         <Grid container spacing={1}>
           <Grid item xs={1} sm={1}>
-            <Avatar className={classes.orange}>
+            <Avatar className={classes.personal}>
               {item.from.replace('"', '').substring(0, 1).toUpperCase()}
             </Avatar>
           </Grid>

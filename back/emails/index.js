@@ -77,7 +77,7 @@ const fetchEmails = async (auth) => {
     const res = await gmail.users.messages.list({
       auth,
       userId: 'me',
-      maxResults: 30,
+      maxResults: 100,
       q: 'after:2021/4/20',
     })
 
@@ -115,6 +115,8 @@ const getMessage = (auth, id) => {
       const to = headers.filter((h) => h['name'] === 'To')[0].value
       const from = headers.filter((h) => h['name'] === 'From')[0].value
       const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
+
+      console.log(labelIds)
 
       // attempt to find the email from many parts
       let emailBody = ''

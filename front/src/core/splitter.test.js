@@ -12,8 +12,8 @@ const APRIL = date(2000, 4, 30)
 test('a weeks worth of email', () => {
   const todayEmail = { id: '1', gmailDate: TODAY.getTime() }
   const yesterdaysEmail = { id: '2', gmailDate: YESTERDAY.getTime() }
-  const earilyMonthEmail = { id: '2', gmailDate: EARLY_MONTH.getTime() }
-  const lastMonthEmail = { id: '2', gmailDate: APRIL.getTime() }
+  const earilyMonthEmail = { id: '3', gmailDate: EARLY_MONTH.getTime() }
+  const lastMonthEmail = { id: '4', gmailDate: APRIL.getTime() }
   const emails = [todayEmail, yesterdaysEmail, earilyMonthEmail, lastMonthEmail]
 
   expect(splitter(emails, TODAY)).toEqual([
