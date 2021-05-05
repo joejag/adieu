@@ -42,16 +42,9 @@ test('yesterday range', () => {
   })
 })
 
-test('this month - without today or yesterday', () => {
-  expect(monthRange(date(2021, 4, 30))).toEqual({
+test('this month', () => {
+  expect(monthRange(date(2021, 4, 29))).toEqual({
     from: date(2021, 4, 1),
-    to: date(2021, 4, 28),
-  })
-})
-
-test('before this month', () => {
-  expect(beforeMonthRange(date(2021, 4, 30))).toEqual({
-    from: date(1970, 1, 1),
-    to: date(2021, 3, 31),
+    to: date(2021, 4, 30),
   })
 })

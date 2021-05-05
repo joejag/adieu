@@ -25,18 +25,11 @@ const monthRange = (today = new Date()) => {
   const from = withoutTime(today)
   from.setUTCDate(1)
   const to = withoutTime(today)
-  to.setUTCDate(to.getUTCDate() - 2)
-
-  return { from, to }
-}
-
-const beforeMonthRange = (today = new Date()) => {
-  const from = new Date(Date.UTC(1970, 0, 1))
-  const to = withoutTime(today)
   to.setUTCDate(1)
+  to.setUTCMonth(to.getUTCMonth() + 1)
   to.setUTCDate(to.getUTCDate() - 1)
 
   return { from, to }
 }
 
-export { within, todayRange, yesterdayRange, monthRange, beforeMonthRange }
+export { within, todayRange, yesterdayRange, monthRange }

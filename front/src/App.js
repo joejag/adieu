@@ -18,6 +18,7 @@ import {
   monthRange,
   beforeMonthRange,
 } from './core/sorter'
+import { splitter } from './core/splitter'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,34 +59,10 @@ const App = () => {
         return res.json()
       })
       .then((res) => {
-        setEmails(res)
+        const splitEmails = splitter(res)
+        setEmails(splitEmails)
       })
   }, [])
-
-  const todayEmails = emails.filter((e) =>
-    within({
-      ...todayRange(),
-      candidate: new Date(parseInt(e.gmailDate)),
-    })
-  )
-  const yesterdayEmails = emails.filter((e) =>
-    within({
-      ...yesterdayRange(),
-      candidate: new Date(parseInt(e.gmailDate)),
-    })
-  )
-  const monthsEmails = emails.filter((e) =>
-    within({
-      ...monthRange(),
-      candidate: new Date(parseInt(e.gmailDate)),
-    })
-  )
-  const previousEmails = emails.filter((e) =>
-    within({
-      ...beforeMonthRange(),
-      candidate: new Date(parseInt(e.gmailDate)),
-    })
-  )
 
   return (
     <Container component="main" maxWidth="lg">
@@ -98,37 +75,15 @@ const App = () => {
         Adieu
       </Typography>
       <div className={classes.root}>
-        {todayEmails.length > 0 && (
-          <Typography className={classes.dayLabel} variant="h5">
-            Today
-          </Typography>
-        )}
-        {todayEmails.map((item) => (
-          <Emails key={item.id} item={item}></Emails>
-        ))}
-        {yesterdayEmails.length > 0 && (
-          <Typography className={classes.dayLabel} variant="h5">
-            Yesterday
-          </Typography>
-        )}
-        {yesterdayEmails.map((item) => (
-          <Emails key={item.id} item={item}></Emails>
-        ))}
-        {monthsEmails.length > 0 && (
-          <Typography className={classes.dayLabel} variant="h5">
-            This month
-          </Typography>
-        )}
-        {monthsEmails.map((item) => (
-          <Emails key={item.id} item={item}></Emails>
-        ))}
-        {previousEmails.length > 0 && (
-          <Typography className={classes.dayLabel} variant="h5">
-            Before this month
-          </Typography>
-        )}
-        {previousEmails.map((item) => (
-          <Emails key={item.id} item={item}></Emails>
+        {emails.map((period) => (
+          <div key={period.label}>
+            <Typography className={classes.dayLabel} variant="h5">
+              {period.label}
+            </Typography>
+            {period.emails.map((email) => (
+              <Emails key={email.id} item={email} />
+            ))}
+          </div>
         ))}
       </div>
     </Container>

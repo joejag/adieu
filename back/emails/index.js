@@ -103,6 +103,7 @@ const getMessage = (auth, id) => {
       userId: 'me',
       id,
       format: 'full',
+      // format: 'metadata',
     })
     .then((res) => {
       const threadId = res.data.threadId
@@ -119,6 +120,7 @@ const getMessage = (auth, id) => {
       let emailBody = ''
       let mimeType = ''
 
+      // If parts. Recurse until you find the text/html, then try text/plan
       if (res.data.payload.parts) {
         const htmlElement = res.data.payload.parts.find(
           (p) => p['mimeType'] === 'text/html'
@@ -133,10 +135,18 @@ const getMessage = (auth, id) => {
           emailBody = textElement.body.data
           mimeType = 'text/plain'
         } else {
+          if (id === '1793b9c747dac319') {
+            console.log(res.data.payload.parts[0].parts)
+          }
+
           // TODO: handle mult/alt thingy better
-          emailBody = res.data.payload.parts[0].parts.find(
+          const possible = res.data.payload.parts[0].parts.find(
             (p) => p['mimeType'] === 'text/html'
-          ).body.data
+          )
+          if (possible) {
+            emailBody = possible.body.data
+          }
+
           mimeType = 'text/html'
         }
       } else {
@@ -159,6 +169,6 @@ const getMessage = (auth, id) => {
       }
     })
     .catch((error) => {
-      console.error(error)
+      console.error(`problem with ${id}`, error)
     })
 }

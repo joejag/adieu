@@ -6,6 +6,9 @@
   - updates:orange
   - finance:green
   - promos:cyan
+  - trips:purple
+  - purchases:brown
+  - social:red
 - Keyboard shortcuts: up, down, open/close (done, undo)
 - Show unread/read status
 - Mark things as 'done'
