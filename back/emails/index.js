@@ -77,16 +77,18 @@ const fetchEmails = async (auth) => {
     const personalMail = await gmail.users.messages.list({
       auth,
       userId: 'me',
-      maxResults: 100,
+      maxResults: 50,
       q: 'after:2021/4/20 label:personal',
     })
 
     const otherMail = await gmail.users.messages.list({
       auth,
       userId: 'me',
-      maxResults: 100,
+      maxResults: 50,
       q: 'after:2021/4/20 NOT label:personal',
     })
+
+    console.log('here 1')
 
     const peronsalMailProms = personalMail.data.messages.map((msg) => {
       return getMessage(auth, msg.id, 'full')
@@ -96,9 +98,9 @@ const fetchEmails = async (auth) => {
       return getMessage(auth, msg.id, 'metadata')
     })
 
-    return Promise.all([...peronsalMailProms, ...otherMailProms]).then(
-      (values) => values
-    )
+    console.log('here 2')
+
+    return await Promise.all([...peronsalMailProms, ...otherMailProms])
   } catch (err) {
     if (err.message === 'No refresh token is set.') {
       throw new Error('feed me new creds')
@@ -116,9 +118,10 @@ const getMessage = (auth, id, format) => {
       userId: 'me',
       id,
       format,
-      // format: 'metadata',
     })
     .then((res) => {
+      console.log('here 4')
+
       const threadId = res.data.threadId
       const snippet = res.data.snippet
       const labelIds = res.data.labelIds
