@@ -88,19 +88,19 @@ const fetchEmails = async (auth) => {
       q: 'after:2021/4/20 NOT label:personal',
     })
 
-    console.log('here 1')
+    const peronal = await Promise.all(
+      personalMail.data.messages.map((msg) => {
+        return getMessage(auth, msg.id, 'full')
+      })
+    )
 
-    const peronsalMailProms = personalMail.data.messages.map((msg) => {
-      return getMessage(auth, msg.id, 'full')
-    })
+    const other = await Promise.all(
+      otherMail.data.messages.map((msg) => {
+        return getMessage(auth, msg.id, 'metadata')
+      })
+    )
 
-    const otherMailProms = otherMail.data.messages.map((msg) => {
-      return getMessage(auth, msg.id, 'metadata')
-    })
-
-    console.log('here 2')
-
-    return await Promise.all([...peronsalMailProms, ...otherMailProms])
+    return [...peronal, ...other]
   } catch (err) {
     if (err.message === 'No refresh token is set.') {
       throw new Error('feed me new creds')
@@ -120,8 +120,6 @@ const getMessage = (auth, id, format) => {
       format,
     })
     .then((res) => {
-      console.log('here 4')
-
       const threadId = res.data.threadId
       const snippet = res.data.snippet
       const labelIds = res.data.labelIds

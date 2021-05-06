@@ -70,6 +70,7 @@ export class AdieuAPIStack extends cdk.Stack {
       code: lambda.Code.fromAsset('../back'),
       handler: 'emails/index.handler',
       timeout: Duration.seconds(30),
+      memorySize: 512,
       environment: {
         CLIENT_ID: clientId,
         CLIENT_SECRET: clientSecret,
