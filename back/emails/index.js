@@ -74,18 +74,31 @@ const fetchEmails = async (auth) => {
 
   // TODO: Catch auth failure and return 401
   try {
-    const res = await gmail.users.messages.list({
+    const personalMail = await gmail.users.messages.list({
       auth,
       userId: 'me',
       maxResults: 100,
-      q: 'after:2021/4/20',
+      q: 'after:2021/4/20 label:personal',
     })
 
-    const proms = res.data.messages.map((msg) => {
-      return getMessage(auth, msg.id)
+    const otherMail = await gmail.users.messages.list({
+      auth,
+      userId: 'me',
+      maxResults: 100,
+      q: 'after:2021/4/20 NOT label:personal',
     })
 
-    return Promise.all(proms).then((values) => values)
+    const peronsalMailProms = personalMail.data.messages.map((msg) => {
+      return getMessage(auth, msg.id, 'full')
+    })
+
+    const otherMailProms = otherMail.data.messages.map((msg) => {
+      return getMessage(auth, msg.id, 'metadata')
+    })
+
+    return Promise.all([...peronsalMailProms, ...otherMailProms]).then(
+      (values) => values
+    )
   } catch (err) {
     if (err.message === 'No refresh token is set.') {
       throw new Error('feed me new creds')
@@ -94,7 +107,7 @@ const fetchEmails = async (auth) => {
   }
 }
 
-const getMessage = (auth, id) => {
+const getMessage = (auth, id, format) => {
   const gmail = google.gmail({ version: 'v1', auth })
 
   return gmail.users.messages
@@ -102,7 +115,7 @@ const getMessage = (auth, id) => {
       auth,
       userId: 'me',
       id,
-      format: 'full',
+      format,
       // format: 'metadata',
     })
     .then((res) => {
@@ -116,44 +129,44 @@ const getMessage = (auth, id) => {
       const from = headers.filter((h) => h['name'] === 'From')[0].value
       const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
 
-      console.log(labelIds)
-
       // attempt to find the email from many parts
       let emailBody = ''
       let mimeType = ''
 
-      // If parts. Recurse until you find the text/html, then try text/plan
-      if (res.data.payload.parts) {
-        const htmlElement = res.data.payload.parts.find(
-          (p) => p['mimeType'] === 'text/html'
-        )
-        const textElement = res.data.payload.parts.find(
-          (p) => p['mimeType'] === 'text/plain'
-        )
-        if (htmlElement) {
-          emailBody = htmlElement.body.data
-          mimeType = 'text/html'
-        } else if (textElement) {
-          emailBody = textElement.body.data
-          mimeType = 'text/plain'
-        } else {
-          if (id === '1793b9c747dac319') {
-            console.log(res.data.payload.parts[0].parts)
-          }
-
-          // TODO: handle mult/alt thingy better
-          const possible = res.data.payload.parts[0].parts.find(
+      if (format === 'full') {
+        // If parts. Recurse until you find the text/html, then try text/plan
+        if (res.data.payload.parts) {
+          const htmlElement = res.data.payload.parts.find(
             (p) => p['mimeType'] === 'text/html'
           )
-          if (possible) {
-            emailBody = possible.body.data
-          }
+          const textElement = res.data.payload.parts.find(
+            (p) => p['mimeType'] === 'text/plain'
+          )
+          if (htmlElement) {
+            emailBody = htmlElement.body.data
+            mimeType = 'text/html'
+          } else if (textElement) {
+            emailBody = textElement.body.data
+            mimeType = 'text/plain'
+          } else {
+            // if (id === '1793b9c747dac319') {
+            //   console.log(res.data.payload.parts[0].parts)
+            // }
 
-          mimeType = 'text/html'
+            // TODO: handle mult/alt thingy better
+            const possible = res.data.payload.parts[0].parts.find(
+              (p) => p['mimeType'] === 'text/html'
+            )
+            if (possible) {
+              emailBody = possible.body.data
+            }
+
+            mimeType = 'text/html'
+          }
+        } else {
+          emailBody = res.data.payload.body.data
+          mimeType = res.data.payload.mimeType
         }
-      } else {
-        emailBody = res.data.payload.body.data
-        mimeType = res.data.payload.mimeType
       }
 
       return {
