@@ -36,6 +36,7 @@ const SocialSummary = ({ bundle }) => {
       bundle={bundle}
       color={classes.social}
       title="Social"
+      link="/social"
     ></GenericSummary>
   )
 }
@@ -48,6 +49,7 @@ const UpdatesSummary = ({ bundle }) => {
       bundle={bundle}
       color={classes.updates}
       title="Updates"
+      link="/updates"
     ></GenericSummary>
   )
 }
@@ -60,6 +62,7 @@ const PromosSummary = ({ bundle }) => {
       bundle={bundle}
       color={classes.promos}
       title="Promos"
+      link="/promos"
     ></GenericSummary>
   )
 }
@@ -72,13 +75,20 @@ const ForumSummary = ({ bundle }) => {
       bundle={bundle}
       color={classes.forum}
       title="Forums"
+      link="/forums"
     ></GenericSummary>
   )
 }
 
-const GenericSummary = ({ title, color, bundle }) => {
+const GenericSummary = ({ title, color, bundle, link }) => {
+  const onExpanded = (event, expanded) => {
+    if (expanded) {
+      window.location = `${window.location.origin}${link}`
+    }
+  }
+
   return (
-    <Accordion>
+    <Accordion onChange={onExpanded}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="panel1a-content"

@@ -42,7 +42,7 @@ for (const [route, handler] of Object.entries(lambdas)) {
 
 // Forward to React
 app.use(
-  '/',
+  '/*',
   createProxyMiddleware({
     target: 'http://localhost:3001',
     changeOrigin: true,
