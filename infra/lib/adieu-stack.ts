@@ -68,7 +68,7 @@ export class AdieuAPIStack extends cdk.Stack {
     const emails = new lambda.Function(this, 'EmailsHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back'),
-      handler: 'emails/index.handler',
+      handler: 'emails/index.emailsHandler',
       timeout: Duration.seconds(30),
       memorySize: 512,
       environment: {
@@ -80,12 +80,35 @@ export class AdieuAPIStack extends cdk.Stack {
     })
     table.grantReadWriteData(emails)
 
+    const email = new lambda.Function(this, 'EmailHandler', {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      code: lambda.Code.fromAsset('../back'),
+      handler: 'emails/index.emailHandler',
+      timeout: Duration.seconds(30),
+      memorySize: 512,
+      environment: {
+        CLIENT_ID: clientId,
+        CLIENT_SECRET: clientSecret,
+        CLIENT_REDIRECT: clientRedirect,
+        SESSIONS_TABLE_NAME: table.tableName,
+      },
+    })
+    table.grantReadWriteData(email)
+
     this.httpApi = new apigw.HttpApi(this, 'ApiGateway')
     this.httpApi.addRoutes({
       path: '/api/emails',
       methods: [apigw.HttpMethod.GET],
       integration: new LambdaProxyIntegration({
         handler: emails,
+      }),
+    })
+
+    this.httpApi.addRoutes({
+      path: '/api/email/{emailId}',
+      methods: [apigw.HttpMethod.GET],
+      integration: new LambdaProxyIntegration({
+        handler: email,
       }),
     })
 

@@ -1,14 +1,11 @@
 # Top things
 
-- Fix local env. Fake the Lambda
+- Bundle view. Get emails on demand.
 - Group by category, or show if personal
   - Today,Yesterday, This Month, March, Feb, Jan, 2020
-  - updates:orange
   - finance:green
-  - promos:cyan
   - trips:purple
   - purchases:brown
-  - social:red
 - Keyboard shortcuts: up, down, open/close (done, undo)
 - Show unread/read status
 - Mark things as 'done'
@@ -83,3 +80,4 @@ aws ssm put-parameter --cli-input-json '{
 # Interesting emails
 
 - 17926f1e1459b897 (multipart/mixed) with PDF
+- 17947ef1f5f89b69 body missing

@@ -1,12 +1,6 @@
 const { google } = require('googleapis')
 const { DynamoDB } = require('aws-sdk')
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
-  process.env.CLIENT_REDIRECT
-)
-
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -14,24 +8,17 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
 }
 
-exports.handler = async (event) => {
+exports.emailsHandler = async (event) => {
   console.log('request:', JSON.stringify(event, undefined, 2))
 
-  if (event.cookies === undefined) {
-    return {
-      statusCode: 401,
-      headers: CORS_HEADERS,
-    }
-  }
-
   try {
-    const sessionId = event.cookies[0].substring(4)
-    const details = await go(sessionId)
+    const oauth2Client = await authWithGoogle(event.cookies)
+    const emails = await fetchEmails(oauth2Client)
 
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
-      body: JSON.stringify(details),
+      body: JSON.stringify(emails),
     }
   } catch (err) {
     if (err.message === 'feed me new creds') {
@@ -49,7 +36,62 @@ exports.handler = async (event) => {
   }
 }
 
-const go = async (sessionId) => {
+exports.emailHandler = async (event) => {
+  console.log('request:', JSON.stringify(event, undefined, 2))
+
+  if (
+    event.pathParameters == undefined ||
+    event.pathParameters.emailId === undefined
+  ) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ reason: 'No email id supplied' }),
+    }
+  }
+
+  try {
+    const oauth2Client = await authWithGoogle(event.cookies)
+    const email = await fetchEmail(
+      oauth2Client,
+      event.pathParameters.emailId,
+      'full'
+    )
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify(email),
+    }
+  } catch (err) {
+    if (err.message === 'feed me new creds') {
+      return {
+        statusCode: 401,
+        headers: CORS_HEADERS,
+      }
+    }
+
+    console.error('unexpected error', err)
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+    }
+  }
+}
+
+const authWithGoogle = async (cookies) => {
+  if (cookies === undefined) {
+    throw new Error('feed me new creds')
+  }
+
+  const sessionId = cookies[0].substring(4)
+
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    process.env.CLIENT_REDIRECT
+  )
+
   const docClient = new DynamoDB.DocumentClient()
   const data = await docClient
     .get({
@@ -66,50 +108,10 @@ const go = async (sessionId) => {
 
   oauth2Client.setCredentials(data.Item.authToken)
 
-  return fetchEmails(oauth2Client)
+  return oauth2Client
 }
 
-const fetchEmails = async (auth) => {
-  const gmail = google.gmail({ version: 'v1', auth })
-
-  // TODO: Catch auth failure and return 401
-  try {
-    const personalMail = await gmail.users.messages.list({
-      auth,
-      userId: 'me',
-      maxResults: 50,
-      q: 'after:2021/4/20 label:personal',
-    })
-
-    const otherMail = await gmail.users.messages.list({
-      auth,
-      userId: 'me',
-      maxResults: 50,
-      q: 'after:2021/4/20 NOT label:personal',
-    })
-
-    const peronal = await Promise.all(
-      personalMail.data.messages.map((msg) => {
-        return getMessage(auth, msg.id, 'full')
-      })
-    )
-
-    const other = await Promise.all(
-      otherMail.data.messages.map((msg) => {
-        return getMessage(auth, msg.id, 'metadata')
-      })
-    )
-
-    return [...peronal, ...other]
-  } catch (err) {
-    if (err.message === 'No refresh token is set.') {
-      throw new Error('feed me new creds')
-    }
-    throw err
-  }
-}
-
-const getMessage = (auth, id, format) => {
+const fetchEmail = (auth, id, format) => {
   const gmail = google.gmail({ version: 'v1', auth })
 
   return gmail.users.messages
@@ -187,4 +189,43 @@ const getMessage = (auth, id, format) => {
     .catch((error) => {
       console.error(`problem with ${id}`, error)
     })
+}
+
+const fetchEmails = async (auth) => {
+  const gmail = google.gmail({ version: 'v1', auth })
+
+  try {
+    const personalMail = await gmail.users.messages.list({
+      auth,
+      userId: 'me',
+      maxResults: 50,
+      q: 'after:2021/4/20 label:personal',
+    })
+
+    const otherMail = await gmail.users.messages.list({
+      auth,
+      userId: 'me',
+      maxResults: 50,
+      q: 'after:2021/4/20 NOT label:personal',
+    })
+
+    const peronal = await Promise.all(
+      personalMail.data.messages.map((msg) => {
+        return fetchEmail(auth, msg.id, 'full')
+      })
+    )
+
+    const other = await Promise.all(
+      otherMail.data.messages.map((msg) => {
+        return fetchEmail(auth, msg.id, 'metadata')
+      })
+    )
+
+    return [...peronal, ...other]
+  } catch (err) {
+    if (err.message === 'No refresh token is set.') {
+      throw new Error('feed me new creds')
+    }
+    throw err
+  }
 }

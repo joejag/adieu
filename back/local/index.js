@@ -15,13 +15,15 @@ const port = 3000
 const lambdas = {
   '/api/login': loginH.loginHandler,
   '/api/callback': loginH.callbackHandler,
-  '/api/emails': emailH.handler,
+  '/api/emails': emailH.emailsHandler,
+  '/api/email/:emailId': emailH.emailHandler,
 }
 for (const [route, handler] of Object.entries(lambdas)) {
   app.get(route, (req, res) => {
     const event = {
       queryStringParameters: req.query,
       cookies: [req.headers.cookie],
+      pathParameters: req.params,
     }
 
     handler(event)
