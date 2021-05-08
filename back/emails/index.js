@@ -195,33 +195,18 @@ const fetchEmails = async (auth) => {
   const gmail = google.gmail({ version: 'v1', auth })
 
   try {
-    const personalMail = await gmail.users.messages.list({
+    const emailIds = await gmail.users.messages.list({
       auth,
       userId: 'me',
       maxResults: 50,
-      q: 'after:2021/4/20 label:personal',
+      q: 'after:2021/4/20',
     })
 
-    const otherMail = await gmail.users.messages.list({
-      auth,
-      userId: 'me',
-      maxResults: 50,
-      q: 'after:2021/4/20 NOT label:personal',
-    })
-
-    const peronal = await Promise.all(
-      personalMail.data.messages.map((msg) => {
-        return fetchEmail(auth, msg.id, 'full')
-      })
-    )
-
-    const other = await Promise.all(
-      otherMail.data.messages.map((msg) => {
+    return await Promise.all(
+      emailIds.data.messages.map((msg) => {
         return fetchEmail(auth, msg.id, 'metadata')
       })
     )
-
-    return [...peronal, ...other]
   } catch (err) {
     if (err.message === 'No refresh token is set.') {
       throw new Error('feed me new creds')

@@ -1,11 +1,8 @@
 # Top things
 
-- Bundle view. Get emails on demand.
+- Store refresh token
 - Group by category, or show if personal
   - Today,Yesterday, This Month, March, Feb, Jan, 2020
-  - finance:green
-  - trips:purple
-  - purchases:brown
 - Keyboard shortcuts: up, down, open/close (done, undo)
 - Show unread/read status
 - Mark things as 'done'
@@ -38,14 +35,16 @@
 
 # Docs
 
-https://github.com/googleapis/google-api-nodejs-client#oauth2-client
-https://developers.google.com/gmail/api/reference/rest/v1/users.messages/list
-https://material-ui.com/components/accordion/
-https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GettingStarted.NodeJs.03.html
+- Original CDK info: https://dev.to/evnz/single-cloudfront-distribution-for-s3-web-app-and-api-gateway-15c3
+- https://github.com/googleapis/google-api-nodejs-client#oauth2-client
+- https://developers.google.com/gmail/api/reference/rest/v1/users.messages/list
+- https://material-ui.com/components/accordion/
+- https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GettingStarted.NodeJs.03.html
 
 Inbox:
 
 - https://cdn3.vox-cdn.com/assets/4435703/Screen3.png
+- Video: https://www.youtube.com/watch?v=aH9EXJMevzo
 
 ## Secrets for SSM
 

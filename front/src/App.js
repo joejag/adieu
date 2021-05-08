@@ -131,7 +131,18 @@ const Emails = ({ item }) => {
 
   const onExpanded = (event, expanded) => {
     if (expanded) {
-      setEmailBody(item.emailBody)
+      const url = `${window.location.origin}/api/email/${item.id}`
+      fetch(url)
+        .then((res) => {
+          if (res.status === 401) {
+            window.location = `${window.location.origin}/api/login`
+            return []
+          }
+          return res.json()
+        })
+        .then((res) => {
+          setEmailBody(res.emailBody)
+        })
     } else {
       setEmailBody(FAKE_BODY)
     }

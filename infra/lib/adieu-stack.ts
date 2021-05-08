@@ -5,6 +5,7 @@ import * as cdk from '@aws-cdk/core'
 import * as cloudfront from '@aws-cdk/aws-cloudfront'
 import * as cm from '@aws-cdk/aws-certificatemanager'
 import * as lambda from '@aws-cdk/aws-lambda'
+import * as iam from '@aws-cdk/aws-iam'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as s3deploy from '@aws-cdk/aws-s3-deployment'
 import * as dynamodb from '@aws-cdk/aws-dynamodb'
@@ -140,6 +141,8 @@ export class AdieuWebStack extends cdk.Stack {
     this.websiteBucket = new s3.Bucket(this, 'StaticAssetsBucket', {
       removalPolicy: RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      websiteIndexDocument: 'index.html',
+      websiteErrorDocument: 'index.html',
     })
 
     new s3deploy.BucketDeployment(this, 'DeployWebsite', {
@@ -167,6 +170,15 @@ export class AdieuCloudfrontStack extends cdk.Stack {
       this,
       'Cert',
       'arn:aws:acm:us-east-1:140551133576:certificate/3e69d173-9c42-446f-960b-faa90c4667dc'
+    )
+
+    props.websiteBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        sid: 'Grant Cloudfront Origin Access Identity access to S3 bucket',
+        actions: ['s3:GetObject'],
+        resources: [props.websiteBucket.bucketArn + '/*'],
+        principals: [props.oai.grantPrincipal],
+      })
     )
 
     new cloudfront.CloudFrontWebDistribution(this, 'Distribution', {
@@ -216,6 +228,13 @@ export class AdieuCloudfrontStack extends cdk.Stack {
                 cloudfront.CloudFrontAllowedMethods.GET_HEAD_OPTIONS,
             },
           ],
+        },
+      ],
+      errorConfigurations: [
+        {
+          errorCode: 403,
+          responseCode: 200,
+          responsePagePath: '/index.html',
         },
       ],
     })
