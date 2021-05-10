@@ -7,6 +7,7 @@ test('the bundles', () => {
   const socialEmail = { id: 3, labelIds: ['CATEGORY_SOCIAL'] }
   const forumEmail = { id: 4, labelIds: ['CATEGORY_FORUMS'] }
   const otherEmail = { id: 5 }
+  const otherCategorisedEmail = { id: 6, labelIds: ['CATEGORY_NEW'] }
   const emails = [
     personalsEmail,
     updatesEmail,
@@ -14,15 +15,18 @@ test('the bundles', () => {
     socialEmail,
     forumEmail,
     otherEmail,
+    otherCategorisedEmail,
   ]
 
   expect(bundled(emails)).toEqual([
-    { label: 'personal', emails: [personalsEmail] },
+    {
+      label: 'personal',
+      emails: [personalsEmail, otherEmail, otherCategorisedEmail],
+    },
     { label: 'updates', emails: [updatesEmail] },
     { label: 'promos', emails: [promosEmail] },
     { label: 'social', emails: [socialEmail] },
     { label: 'forum', emails: [forumEmail] },
-    { label: 'other', emails: [otherEmail] },
   ])
 })
 

@@ -1,10 +1,15 @@
 const bundled = (emails) => {
-  // TODO: Do other properly by taking what does not have a home
   return [
     {
       label: 'personal',
       emails: emails.filter(
-        (e) => e.labelIds && e.labelIds.includes('CATEGORY_PERSONAL')
+        (e) =>
+          !e.labelIds ||
+          (e.labelIds && e.labelIds.includes('CATEGORY_PERSONAL')) ||
+          (!e.labelIds.includes('CATEGORY_UPDATES') &&
+            !e.labelIds.includes('CATEGORY_PROMOTIONS') &&
+            !e.labelIds.includes('CATEGORY_SOCIAL') &&
+            !e.labelIds.includes('CATEGORY_FORUMS'))
       ),
     },
     {
@@ -30,10 +35,6 @@ const bundled = (emails) => {
       emails: emails.filter(
         (e) => e.labelIds && e.labelIds.includes('CATEGORY_FORUMS')
       ),
-    },
-    {
-      label: 'other',
-      emails: emails.filter((e) => e.labelIds === undefined),
     },
   ].filter((b) => b.emails.length)
 }

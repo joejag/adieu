@@ -6,9 +6,8 @@
 - Show unread/read status
 - Mark things as 'done'
 - mobile view
-- Show email threads together
 
-# Nice things - small effot
+# Nice things - small effort
 
 - Take all letters of the name to create Avatar up to three
 - Add icons for common services (github, linkedin, google etc)
