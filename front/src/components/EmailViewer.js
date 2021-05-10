@@ -49,7 +49,7 @@ const EmailViewer = ({ item, color }) => {
           </Grid>
 
           <Grid item xs={2} sm={2}>
-            <Typography>
+            <Typography style={{ fontWeight: item.unread ? 600 : 400 }}>
               {item.from
                 .substring(0, item.from.indexOf('<'))
                 .replace('"', '')
@@ -58,7 +58,9 @@ const EmailViewer = ({ item, color }) => {
           </Grid>
 
           <Grid item xs={9} sm={9}>
-            <Typography>{item.subject}</Typography>
+            <Typography style={{ fontWeight: item.unread ? 600 : 400 }}>
+              {item.subject}
+            </Typography>
           </Grid>
         </Grid>
       </AccordionSummary>

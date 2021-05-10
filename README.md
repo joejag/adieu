@@ -1,6 +1,5 @@
 # Top things
 
-- Show unread/read status
 - Attachments
 - Keyboard shortcuts: up, down, open/close (done, undo)
 - Mark things as 'done'

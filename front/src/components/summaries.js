@@ -117,7 +117,7 @@ const GenericSummary = ({ title, color, bundle, link }) => {
           <Grid item xs={9} sm={9}>
             <Typography>
               {bundle.emails.map((e) => (
-                <span key={e.id}>
+                <span key={e.id} style={{ fontWeight: e.unread ? 600 : 400 }}>
                   {e.from
                     .substring(0, e.from.indexOf('<'))
                     .replace('"', '')
