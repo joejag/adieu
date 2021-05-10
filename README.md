@@ -1,7 +1,6 @@
 # Top things
 
-- Store refresh token
-- Group by category, or show if personal
+- Group by date:
   - Today,Yesterday, This Month, March, Feb, Jan, 2020
 - Keyboard shortcuts: up, down, open/close (done, undo)
 - Show unread/read status

@@ -22,7 +22,7 @@ for (const [route, handler] of Object.entries(lambdas)) {
   app.get(route, (req, res) => {
     const event = {
       queryStringParameters: req.query,
-      cookies: [req.headers.cookie],
+      cookies: req.headers.cookie ? [req.headers.cookie] : undefined,
       pathParameters: req.params,
     }
 
