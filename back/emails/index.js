@@ -153,10 +153,6 @@ const fetchEmail = (auth, id, format) => {
             emailBody = textElement.body.data
             mimeType = 'text/plain'
           } else {
-            // if (id === '1793b9c747dac319') {
-            //   console.log(res.data.payload.parts[0].parts)
-            // }
-
             // TODO: handle mult/alt thingy better
             const possible = res.data.payload.parts[0].parts.find(
               (p) => p['mimeType'] === 'text/html'
@@ -187,6 +183,22 @@ const fetchEmail = (auth, id, format) => {
         mimeType,
         emailBody,
       }
+    })
+    .then((result) => {
+      if (format !== 'full' || !result.labelIds.includes('UNREAD')) {
+        return result
+      }
+
+      return gmail.users.messages
+        .modify({
+          userId: 'me',
+          id: result.id,
+          resource: {
+            addLabelIds: [],
+            removeLabelIds: ['UNREAD'],
+          },
+        })
+        .then(() => result)
     })
     .catch((error) => {
       console.error(`problem with ${id}`, error)

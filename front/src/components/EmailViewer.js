@@ -14,6 +14,7 @@ const FAKE_BODY = btoa('<p>&nbsp;</p>'.repeat(20))
 
 const EmailViewer = ({ item, color }) => {
   const [emailBody, setEmailBody] = React.useState(FAKE_BODY)
+  const [fontWeight, setFontWeight] = React.useState(item.unread ? 600 : 400)
 
   const onExpanded = (event, expanded) => {
     if (expanded) {
@@ -28,6 +29,7 @@ const EmailViewer = ({ item, color }) => {
         })
         .then((res) => {
           setEmailBody(res.emailBody)
+          setFontWeight(400)
         })
     } else {
       setEmailBody(FAKE_BODY)
@@ -49,7 +51,7 @@ const EmailViewer = ({ item, color }) => {
           </Grid>
 
           <Grid item xs={2} sm={2}>
-            <Typography style={{ fontWeight: item.unread ? 600 : 400 }}>
+            <Typography style={{ fontWeight }}>
               {item.from
                 .substring(0, item.from.indexOf('<'))
                 .replace('"', '')
@@ -58,9 +60,7 @@ const EmailViewer = ({ item, color }) => {
           </Grid>
 
           <Grid item xs={9} sm={9}>
-            <Typography style={{ fontWeight: item.unread ? 600 : 400 }}>
-              {item.subject}
-            </Typography>
+            <Typography style={{ fontWeight }}>{item.subject}</Typography>
           </Grid>
         </Grid>
       </AccordionSummary>

@@ -1,6 +1,5 @@
 # Top things
 
-- Mark things as 'read'
 - minify the lambda code
 - Attachments
 - Keyboard shortcuts: up, down, open/close (done, undo)
