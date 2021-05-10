@@ -1,11 +1,11 @@
 # Top things
 
-- Group by date:
-  - Today,Yesterday, This Month, March, Feb, Jan, 2020
-- Keyboard shortcuts: up, down, open/close (done, undo)
 - Show unread/read status
+- Attachments
+- Keyboard shortcuts: up, down, open/close (done, undo)
 - Mark things as 'done'
-- mobile view
+- UI: mobile view
+- cache retrieved emails in a global context object
 
 # Nice things - small effort
 

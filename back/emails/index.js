@@ -131,6 +131,7 @@ const fetchEmail = (auth, id, format) => {
       const to = headers.filter((h) => h['name'] === 'To')[0].value
       const from = headers.filter((h) => h['name'] === 'From')[0].value
       const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
+      const unread = res.data.labelIds.includes('UNREAD')
 
       // attempt to find the email from many parts
       let emailBody = ''
@@ -177,6 +178,7 @@ const fetchEmail = (auth, id, format) => {
         threadId,
         date,
         gmailDate,
+        unread,
         to,
         from,
         subject,
@@ -198,8 +200,8 @@ const fetchEmails = async (auth) => {
     const emailIds = await gmail.users.messages.list({
       auth,
       userId: 'me',
-      maxResults: 50,
-      q: 'after:2021/4/20',
+      maxResults: 100,
+      q: 'after:2021/4/20 NOT label:SENT',
     })
 
     return await Promise.all(

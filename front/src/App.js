@@ -66,6 +66,12 @@ const App = () => {
         })
 
         setEmails(newSplit)
+
+        if (res.length) {
+          // warm up the Lambda
+          const firstEmail = `${window.location.origin}/api/email/${res[0].id}`
+          fetch(firstEmail).then()
+        }
       })
   }, [])
 
