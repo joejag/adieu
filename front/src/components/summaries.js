@@ -94,7 +94,7 @@ const GenericSummary = ({ title, color, bundle, link }) => {
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
-        <Grid container spacing={1}>
+        <Grid container spacing={0}>
           <Grid item xs={1} sm={1}>
             {title === 'Social' && (
               <PeopleIcon fontSize="large" className={color} />

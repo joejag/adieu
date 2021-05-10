@@ -43,7 +43,7 @@ const EmailViewer = ({ item, color }) => {
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
-        <Grid container spacing={1}>
+        <Grid container spacing={0}>
           <Grid item xs={1} sm={1}>
             <Avatar className={color}>
               {item.from.replace('"', '').substring(0, 1).toUpperCase()}
@@ -51,7 +51,7 @@ const EmailViewer = ({ item, color }) => {
           </Grid>
 
           <Grid item xs={2} sm={2}>
-            <Typography style={{ fontWeight }}>
+            <Typography style={{ fontWeight }} noWrap={true}>
               {item.from
                 .substring(0, item.from.indexOf('<'))
                 .replace('"', '')
@@ -59,7 +59,7 @@ const EmailViewer = ({ item, color }) => {
             </Typography>
           </Grid>
 
-          <Grid item xs={9} sm={9}>
+          <Grid item xs={8} sm={8}>
             <Typography style={{ fontWeight }}>{item.subject}</Typography>
           </Grid>
         </Grid>

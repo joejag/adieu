@@ -62,7 +62,7 @@ const App = () => {
         setEmails(newSplit)
 
         // warm up the Lambda
-        const warmup = res.find((e) => e.unread)
+        const warmup = res.find((e) => !e.unread)
         if (warmup !== undefined) {
           const firstEmail = `${window.location.origin}/api/email/${warmup.id}`
           fetch(firstEmail).then()

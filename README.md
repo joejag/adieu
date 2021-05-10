@@ -1,5 +1,6 @@
 # Top things
 
+- recursive body finder
 - minify the lambda code
 - Attachments
 - Keyboard shortcuts: up, down, open/close (done, undo)
@@ -23,7 +24,6 @@
 - Create fancy cards for trips
 - spruce up emails, if style is missing add it (like Kent Dodds pre section)
 - Sleeping things
-- store OAuth redirect for all sessions rather than just the initial one
 
 # Probably never
 
