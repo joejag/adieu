@@ -212,8 +212,8 @@ const fetchEmails = async (auth) => {
     const emailIds = await gmail.users.messages.list({
       auth,
       userId: 'me',
-      maxResults: 100,
-      q: 'after:2021/4/20 NOT label:SENT',
+      maxResults: 30,
+      q: 'NOT label:SENT',
     })
 
     return await Promise.all(

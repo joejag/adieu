@@ -3,10 +3,12 @@
 - recursive body finder
 - minify the lambda code
 - Attachments
+- cache retrieved emails in a global context object
+
+# If we do Inbox style
+
 - Keyboard shortcuts: up, down, open/close (done, undo)
 - Mark things as 'done'
-- UI: mobile view
-- cache retrieved emails in a global context object
 
 # Nice things - small effort
 
@@ -80,3 +82,4 @@ aws ssm put-parameter --cli-input-json '{
 - 17947ef1f5f89b69 body missing
 - 1793b9c747dac319 body missing
 - 1793d9aa4d62a079 not being shown properly
+- 1795bc65ceba377a body being truncated

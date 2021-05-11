@@ -43,23 +43,38 @@ const EmailViewer = ({ item, color }) => {
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
-        <Grid container spacing={0}>
-          <Grid item xs={1} sm={1}>
-            <Avatar className={color}>
-              {item.from.replace('"', '').substring(0, 1).toUpperCase()}
-            </Avatar>
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          alignItems="center"
+          justify="flex-start"
+        >
+          <Grid
+            item
+            xs={12}
+            md={3}
+            container
+            spacing={1}
+            alignItems="center"
+            justify="flex-start"
+          >
+            <Grid item>
+              <Avatar className={color}>
+                {item.from.replace('"', '').substring(0, 1).toUpperCase()}
+              </Avatar>
+            </Grid>
+            <Grid item xs zeroMinWidth>
+              <Typography style={{ fontWeight }} noWrap={true}>
+                {item.from
+                  .substring(0, item.from.indexOf('<'))
+                  .replace('"', '')
+                  .replace('"', '')}
+              </Typography>
+            </Grid>
           </Grid>
 
-          <Grid item xs={2} sm={2}>
-            <Typography style={{ fontWeight }} noWrap={true}>
-              {item.from
-                .substring(0, item.from.indexOf('<'))
-                .replace('"', '')
-                .replace('"', '')}
-            </Typography>
-          </Grid>
-
-          <Grid item xs={8} sm={8}>
+          <Grid item xs={12} md={9}>
             <Typography style={{ fontWeight }}>{item.subject}</Typography>
           </Grid>
         </Grid>

@@ -94,27 +94,43 @@ const GenericSummary = ({ title, color, bundle, link }) => {
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
-        <Grid container spacing={0}>
-          <Grid item xs={1} sm={1}>
-            {title === 'Social' && (
-              <PeopleIcon fontSize="large" className={color} />
-            )}
-            {title === 'Updates' && (
-              <FlagIcon fontSize="large" className={color} />
-            )}
-            {title === 'Promos' && (
-              <LocalOfferIcon fontSize="large" className={color} />
-            )}
-            {title === 'Forums' && (
-              <ForumIcon fontSize="large" className={color} />
-            )}
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          alignItems="center"
+          justify="flex-start"
+        >
+          <Grid
+            item
+            xs={12}
+            md={3}
+            container
+            spacing={1}
+            alignItems="center"
+            justify="flex-start"
+          >
+            <Grid item>
+              {title === 'Social' && (
+                <PeopleIcon fontSize="large" className={color} />
+              )}
+              {title === 'Updates' && (
+                <FlagIcon fontSize="large" className={color} />
+              )}
+              {title === 'Promos' && (
+                <LocalOfferIcon fontSize="large" className={color} />
+              )}
+              {title === 'Forums' && (
+                <ForumIcon fontSize="large" className={color} />
+              )}
+            </Grid>
+
+            <Grid item xs zeroMinWidth>
+              <Typography className={color}>{title}</Typography>
+            </Grid>
           </Grid>
 
-          <Grid item xs={2} sm={2}>
-            <Typography className={color}>{title}</Typography>
-          </Grid>
-
-          <Grid item xs={9} sm={9}>
+          <Grid item xs={12} md={9}>
             <Typography>
               {bundle.emails.map((e) => (
                 <span key={e.id} style={{ fontWeight: e.unread ? 600 : 400 }}>
