@@ -244,3 +244,24 @@ test('map multipart plain email', () => {
     })
   )
 })
+
+const cases = [
+  ['Lee Richards <LRichards@educationstaffbank.com>', 'Lee Richards'],
+  ['"Lee Richards" <LRichards@educationstaffbank.com>', 'Lee Richards'],
+  ['<LRichards@educationstaffbank.com>', 'LRichards@educationstaffbank.com'],
+  ['LRichards@educationstaffbank.com', 'LRichards@educationstaffbank.com'],
+]
+
+describe('can extract a reasonable name for the sender', () => {
+  test.each(cases)('given %sender', (sender, expectedResult) => {
+    const email = MULTIPART_PLAIN_EMAIL
+    email.payload.headers = [
+      { name: 'From', value: sender },
+      ...email.payload.headers,
+    ]
+
+    expect(gmailToAdieuMail('1', email, 'metadata').fromName).toEqual(
+      expectedResult
+    )
+  })
+})

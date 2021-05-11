@@ -68,10 +68,7 @@ const EmailViewer = ({ item, color }) => {
             </Grid>
             <Grid item xs zeroMinWidth>
               <Typography style={{ fontWeight }} noWrap={true}>
-                {item.from
-                  .substring(0, item.from.indexOf('<'))
-                  .replace('"', '')
-                  .replace('"', '')}
+                {item.fromName}
               </Typography>
             </Grid>
           </Grid>

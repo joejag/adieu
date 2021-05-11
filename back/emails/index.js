@@ -157,6 +157,19 @@ const gmailToAdieuMail = (id, data, format) => {
   const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
   const unread = data.labelIds.includes('UNREAD')
 
+  let fromName = from
+    .substring(0, from.indexOf('<'))
+    .replace('"', '')
+    .replace('"', '')
+    .trim()
+
+  if (from.trim().indexOf('<') === 0) {
+    fromName = from.trim().substring(1, from.trim().length - 1)
+  }
+  if (fromName.trim().length === 0) {
+    fromName = from
+  }
+
   // attempt to find the email from many parts
   let emailBody = ''
   let mimeType = ''
@@ -184,6 +197,7 @@ const gmailToAdieuMail = (id, data, format) => {
     unread,
     to,
     from,
+    fromName,
     subject,
     labelIds,
     snippet,

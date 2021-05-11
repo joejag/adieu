@@ -134,10 +134,7 @@ const GenericSummary = ({ title, color, bundle, link }) => {
             <Typography>
               {bundle.emails.map((e) => (
                 <span key={e.id} style={{ fontWeight: e.unread ? 600 : 400 }}>
-                  {e.from
-                    .substring(0, e.from.indexOf('<'))
-                    .replace('"', '')
-                    .replace('"', '') + ', '}
+                  {e.fromName + ', '}
                 </span>
               ))}
             </Typography>
