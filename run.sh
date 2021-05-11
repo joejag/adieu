@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 
 export CLIENT_ID="$(aws ssm get-parameter --name '/adieu/client-id' --query 'Parameter.Value' --output text)"
 export CLIENT_SECRET="$(aws ssm get-parameter --name '/adieu/client-secret' --query 'Parameter.Value' --output text)"
