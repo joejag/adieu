@@ -1,9 +1,8 @@
 # Top things
 
-- recursive body finder
-- minify the lambda code
 - Attachments
 - cache retrieved emails in a global context object
+- load embedded images (1795ab0217072bf4)
 
 # If we do Inbox style
 

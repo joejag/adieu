@@ -121,74 +121,13 @@ const fetchEmail = (auth, id, format) => {
       id,
       format,
     })
-    .then((res) => {
-      const threadId = res.data.threadId
-      const snippet = res.data.snippet
-      const labelIds = res.data.labelIds
-      const headers = res.data.payload.headers
-      const gmailDate = res.data.internalDate
-      const date = headers.filter((h) => h['name'] === 'Date')[0].value
-      const to = headers.filter((h) => h['name'] === 'To')[0].value
-      const from = headers.filter((h) => h['name'] === 'From')[0].value
-      const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
-      const unread = res.data.labelIds.includes('UNREAD')
-
-      // attempt to find the email from many parts
-      let emailBody = ''
-      let mimeType = ''
-
-      if (format === 'full') {
-        // If parts. Recurse until you find the text/html, then try text/plan
-        if (res.data.payload.parts) {
-          const htmlElement = res.data.payload.parts.find(
-            (p) => p['mimeType'] === 'text/html'
-          )
-          const textElement = res.data.payload.parts.find(
-            (p) => p['mimeType'] === 'text/plain'
-          )
-          if (htmlElement) {
-            emailBody = htmlElement.body.data
-            mimeType = 'text/html'
-          } else if (textElement) {
-            emailBody = textElement.body.data
-            mimeType = 'text/plain'
-          } else {
-            // TODO: handle mult/alt thingy better
-            const possible = res.data.payload.parts[0].parts.find(
-              (p) => p['mimeType'] === 'text/html'
-            )
-            if (possible) {
-              emailBody = possible.body.data
-            }
-
-            mimeType = 'text/html'
-          }
-        } else {
-          emailBody = res.data.payload.body.data
-          mimeType = res.data.payload.mimeType
-        }
-      }
-
-      return {
-        id,
-        threadId,
-        date,
-        gmailDate,
-        unread,
-        to,
-        from,
-        subject,
-        labelIds,
-        snippet,
-        mimeType,
-        emailBody,
-      }
-    })
+    .then((res) => gmailToAdieuMail(id, res.data, format))
     .then((result) => {
       if (format !== 'full' || !result.labelIds.includes('UNREAD')) {
         return result
       }
 
+      // Mark email as read
       return gmail.users.messages
         .modify({
           userId: 'me',
@@ -203,6 +142,73 @@ const fetchEmail = (auth, id, format) => {
     .catch((error) => {
       console.error(`problem with ${id}`, error)
     })
+}
+
+const gmailToAdieuMail = (id, data, format) => {
+  const threadId = data.threadId
+  const snippet = data.snippet
+  const labelIds = data.labelIds
+  const gmailDate = data.internalDate
+
+  const headers = data.payload.headers
+  const date = headers.filter((h) => h['name'] === 'Date')[0].value
+  const to = headers.filter((h) => h['name'] === 'To')[0].value
+  const from = headers.filter((h) => h['name'] === 'From')[0].value
+  const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
+  const unread = data.labelIds.includes('UNREAD')
+
+  // attempt to find the email from many parts
+  let emailBody = ''
+  let mimeType = ''
+
+  if (format === 'full') {
+    const matchingHtmlPart = findContentType(data.payload.parts, 'text/html')
+    const matchingPlainPart = findContentType(data.payload.parts, 'text/plain')
+    if (matchingHtmlPart !== undefined) {
+      emailBody = matchingHtmlPart.body.data
+      mimeType = 'text/html'
+    } else if (matchingPlainPart !== undefined) {
+      emailBody = matchingPlainPart.body.data
+      mimeType = 'text/plain'
+    } else {
+      emailBody = data.payload.body.data
+      mimeType = data.payload.mimeType
+    }
+  }
+
+  return {
+    id,
+    threadId,
+    date,
+    gmailDate,
+    unread,
+    to,
+    from,
+    subject,
+    labelIds,
+    snippet,
+    mimeType,
+    emailBody,
+  }
+}
+exports.gmailToAdieuMail = gmailToAdieuMail
+
+// 'multipart/mixed' emails are deeply nested, gotta search them all
+const findContentType = (currentParts, contentType) => {
+  if (currentParts === undefined) return undefined
+
+  const htmlElement = currentParts.find((p) => p['mimeType'] === contentType)
+  if (htmlElement) {
+    return htmlElement
+  }
+
+  const subpartWithParts = currentParts.filter((p) => p.parts !== undefined)
+  for (const subpart of subpartWithParts) {
+    const possible = findContentType(subpart.parts, contentType)
+    if (possible !== undefined) {
+      return possible
+    }
+  }
 }
 
 const fetchEmails = async (auth) => {

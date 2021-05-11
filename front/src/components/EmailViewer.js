@@ -14,6 +14,7 @@ const FAKE_BODY = btoa('<p>&nbsp;</p>'.repeat(20))
 
 const EmailViewer = ({ item, color }) => {
   const [emailBody, setEmailBody] = React.useState(FAKE_BODY)
+  const [mimeType, setMimeType] = React.useState('')
   const [fontWeight, setFontWeight] = React.useState(item.unread ? 600 : 400)
 
   const onExpanded = (event, expanded) => {
@@ -29,6 +30,7 @@ const EmailViewer = ({ item, color }) => {
         })
         .then((res) => {
           setEmailBody(res.emailBody)
+          setMimeType(res.mimeType)
           setFontWeight(400)
         })
     } else {
@@ -82,7 +84,7 @@ const EmailViewer = ({ item, color }) => {
       <AccordionDetails>
         <FullheightIframe
           emailbody={emailBody}
-          mimeType={item.mimeType}
+          mimeType={mimeType}
           subject={item.subject}
         />
       </AccordionDetails>
