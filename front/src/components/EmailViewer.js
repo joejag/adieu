@@ -9,7 +9,7 @@ import Avatar from '@material-ui/core/Avatar'
 
 import FullheightIframe from './iframe'
 
-// Used to make the opening transition less jumpt
+// Used to make the opening transition less jumpy
 const FAKE_BODY = btoa('<p>&nbsp;</p>'.repeat(20))
 
 const EmailViewer = ({ item, color }) => {
@@ -63,7 +63,7 @@ const EmailViewer = ({ item, color }) => {
           >
             <Grid item>
               <Avatar className={color}>
-                {item.from.replace('"', '').substring(0, 1).toUpperCase()}
+                {item.fromName.substring(0, 1).toUpperCase()}
               </Avatar>
             </Grid>
             <Grid item xs zeroMinWidth>
