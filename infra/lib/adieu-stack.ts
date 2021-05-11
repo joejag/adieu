@@ -39,8 +39,8 @@ export class AdieuAPIStack extends cdk.Stack {
 
     const login = new lambda.Function(this, 'LoginHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
-      code: lambda.Code.fromAsset('../back'),
-      handler: 'login/index.loginHandler',
+      code: lambda.Code.fromAsset('../back/build/login'),
+      handler: 'index.loginHandler',
       timeout: Duration.seconds(30),
       environment: {
         CLIENT_ID: clientId,
@@ -53,8 +53,8 @@ export class AdieuAPIStack extends cdk.Stack {
 
     const callback = new lambda.Function(this, 'CallbackHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
-      code: lambda.Code.fromAsset('../back'),
-      handler: 'login/index.callbackHandler',
+      code: lambda.Code.fromAsset('../back/build/login'),
+      handler: 'index.callbackHandler',
       timeout: Duration.seconds(30),
       environment: {
         CLIENT_ID: clientId,
@@ -68,8 +68,8 @@ export class AdieuAPIStack extends cdk.Stack {
 
     const emails = new lambda.Function(this, 'EmailsHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
-      code: lambda.Code.fromAsset('../back'),
-      handler: 'emails/index.emailsHandler',
+      code: lambda.Code.fromAsset('../back/build/emails'),
+      handler: 'index.emailsHandler',
       timeout: Duration.seconds(30),
       memorySize: 512,
       environment: {
@@ -83,8 +83,8 @@ export class AdieuAPIStack extends cdk.Stack {
 
     const email = new lambda.Function(this, 'EmailHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
-      code: lambda.Code.fromAsset('../back'),
-      handler: 'emails/index.emailHandler',
+      code: lambda.Code.fromAsset('../back/build/emails'),
+      handler: 'index.emailHandler',
       timeout: Duration.seconds(30),
       memorySize: 512,
       environment: {
