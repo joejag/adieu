@@ -1,7 +1,6 @@
 # Top things
 
 - load embedded images (1795ab0217072bf4)
-- Add links to text/plain emails
 - Attachments
 - Keyboard shortcuts: up, down, open/close
 

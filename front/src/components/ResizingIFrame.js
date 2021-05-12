@@ -20,6 +20,12 @@ class ResizingIFrame extends React.Component {
         '<p>' +
         content.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>') +
         '</p>'
+
+      // make links to hyperlinks
+      content = content.replace(
+        /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*))/g,
+        '<a href="$1">$1</a>'
+      )
     }
 
     // handle links opening in the same page

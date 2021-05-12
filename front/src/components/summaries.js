@@ -126,9 +126,9 @@ const GenericSummary = ({ title, color, bundle, link, icon }) => {
 
           <Grid item xs={12} md={9}>
             <Typography>
-              {bundle.emails.map((e) => (
+              {bundle.emails.map((e, idx) => (
                 <span key={e.id} style={{ fontWeight: e.unread ? 600 : 400 }}>
-                  {e.fromName + ', '}
+                  {e.fromName + (idx !== bundle.emails.length - 1 ? ', ' : '')}
                 </span>
               ))}
             </Typography>
