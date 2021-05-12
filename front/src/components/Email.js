@@ -9,6 +9,7 @@ import Avatar from '@material-ui/core/Avatar'
 
 import ResizingIFrame from './ResizingIFrame'
 import { fetchEmail } from '../api-client'
+import AttachmentCard from './Attachment'
 
 // Used to make the opening transition less jumpy
 const FAKE_BODY = btoa('<p>&nbsp;</p>'.repeat(20))
@@ -64,11 +65,20 @@ const Email = ({ item, color, updateEmail }) => {
         </Grid>
       </AccordionSummary>
       <AccordionDetails>
-        <ResizingIFrame
-          emailbody={emailBody}
-          mimeType={item.mimeType}
-          subject={item.subject}
-        />
+        <Grid container spacing={2} direction="column">
+          <Grid item>
+            {item.attachments.map((a) => (
+              <AttachmentCard key={a.id} item={a} />
+            ))}
+          </Grid>
+          <Grid item>
+            <ResizingIFrame
+              emailbody={emailBody}
+              mimeType={item.mimeType}
+              subject={item.subject}
+            />
+          </Grid>
+        </Grid>
       </AccordionDetails>
     </Accordion>
   )

@@ -3,6 +3,7 @@
 - load embedded images (1795ab0217072bf4)
 - Attachments
 - Keyboard shortcuts: up, down, open/close
+- unsub (1795ab0217072bf4)
 
 # Nice things
 
@@ -30,6 +31,7 @@
 - https://developers.google.com/gmail/api/reference/rest/v1/users.messages/list
 - https://material-ui.com/components/accordion/
 - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GettingStarted.NodeJs.03.html
+- Content-id spec: https://datatracker.ietf.org/doc/html/rfc2392
 
 Inbox:
 

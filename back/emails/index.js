@@ -149,14 +149,16 @@ const fetchEmail = (auth, id, format) => {
 const gmailToAdieuMail = (id, data, format) => {
   const threadId = data.threadId
   const snippet = data.snippet
-  const labelIds = data.labelIds || []
   const gmailDate = data.internalDate
-  const headers = data.payload.headers
+  const labelIds = data.labelIds || []
   const unread = data.labelIds.includes('UNREAD')
-  const date = headers.filter((h) => h['name'] === 'Date')[0].value
-  const to = headers.filter((h) => h['name'] === 'To')[0].value
-  const from = headers.filter((h) => h['name'] === 'From')[0].value
-  const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
+  const headers = data.payload.headers
+  const to = headers.find(({ name }) => name === 'To').value
+  const from = headers.find(({ name }) => name === 'From').value
+  const subject = headers.find(({ name }) => name === 'Subject').value
+  const date = headers.find(({ name }) => name === 'Date').value
+
+  const attachments = findAttachments(data.payload.parts)
 
   // try and make a human readable version of the sender
   let fromName = from
@@ -171,11 +173,10 @@ const gmailToAdieuMail = (id, data, format) => {
     fromName = from
   }
 
-  // attempt to find the email from many parts
   let emailBody = ''
   let mimeType = ''
-
   if (format === 'full') {
+    // Find html or plain version in all the parts
     const matchingHtmlPart = findContentType(data.payload.parts, 'text/html')
     const matchingPlainPart = findContentType(data.payload.parts, 'text/plain')
     if (matchingHtmlPart !== undefined) {
@@ -190,6 +191,11 @@ const gmailToAdieuMail = (id, data, format) => {
     }
   }
 
+  if (id === '1793b9c747dac319') {
+    // console.log(data)
+    console.log(data.payload)
+  }
+
   return {
     id,
     threadId,
@@ -202,30 +208,48 @@ const gmailToAdieuMail = (id, data, format) => {
     subject,
     labelIds,
     snippet,
+    attachments,
     mimeType,
     emailBody,
   }
 }
 exports.gmailToAdieuMail = gmailToAdieuMail
 
-// 'multipart/mixed' emails are deeply nested, gotta search them all
 const findContentType = (currentParts, contentType) => {
-  if (currentParts === undefined) return undefined
+  return walkParts(currentParts, (p) => p['mimeType'] === contentType)[0]
+}
 
-  const matchingElement = currentParts.find(
-    (p) => p['mimeType'] === contentType
+const findAttachments = (currentParts) => {
+  const parts = walkParts(currentParts, (p) =>
+    p.headers.some(
+      ({ name, value }) =>
+        name === 'Content-Disposition' && value.startsWith('attachment;')
+    )
   )
+  return parts.map((p) => {
+    return {
+      filename: p.filename,
+      id: p.body.attachmentId,
+      mimeType: p.mimeType,
+    }
+  })
+}
+
+const walkParts = (part, predicate, matches = []) => {
+  if (part === undefined) return []
+
+  const matchingElement = part.find(predicate)
   if (matchingElement) {
-    return matchingElement
+    matches.push(matchingElement)
   }
 
-  const subpartWithParts = currentParts.filter((p) => p.parts !== undefined)
+  const subpartWithParts = part.filter((p) => p.parts)
   for (const subpart of subpartWithParts) {
-    const possible = findContentType(subpart.parts, contentType)
-    if (possible !== undefined) {
-      return possible
-    }
+    const matchingElements = walkParts(subpart.parts, predicate)
+    matches = [...matches, ...matchingElements]
   }
+
+  return matches
 }
 
 const fetchEmails = async (auth) => {
@@ -235,7 +259,7 @@ const fetchEmails = async (auth) => {
     const emailIds = await gmail.users.messages.list({
       auth,
       userId: 'me',
-      maxResults: 30,
+      maxResults: 100,
       q: 'NOT label:SENT',
     })
 
