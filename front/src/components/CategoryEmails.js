@@ -4,9 +4,10 @@ import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import { red, deepOrange, cyan, purple } from '@material-ui/core/colors'
 
-import EmailViewer from './components/EmailViewer'
-import { splitter } from './core/splitter'
-import { bundled } from './core/bundler'
+import Email from './Email'
+import { useEmails } from '../emails-context'
+import { fetchEmails } from '../api-client'
+import { bundleEmailsByDate } from '../core/emails'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,10 +19,6 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(4),
     marginBottom: theme.spacing(2),
     marginLeft: theme.spacing(3.5),
-  },
-  emailbody: {
-    width: '100%',
-    height: '100%',
   },
   rule: {
     borderBottom: `1px solid ${theme.palette.divider}`,
@@ -90,29 +87,19 @@ const UpdatesBundle = () => {
 
 const Bundle = ({ title, bundleType, color }) => {
   const classes = useStyles()
+  const [cachedEmails, setCachedEmails, updateEmail] = useEmails()
   const [emails, setEmails] = React.useState([])
 
   React.useEffect(() => {
-    const url = `${window.location.origin}/api/emails`
-    fetch(url)
-      .then((res) => {
-        if (res.status === 401) {
-          window.location = `${window.location.origin}/api/login`
-          return []
-        }
-        return res.json()
-      })
-      .then((res) => {
-        const bundleEmails = res.filter((r) => r.labelIds.includes(bundleType))
-        const splitEmails = splitter(bundleEmails)
-        const newSplit = splitEmails.map((period) => {
-          period.emails = bundled(period.emails)
-          return period
-        })
+    if (cachedEmails.length > 0) {
+      return
+    }
+    fetchEmails().then(setCachedEmails)
+  }, [cachedEmails, setCachedEmails])
 
-        setEmails(newSplit)
-      })
-  }, [bundleType])
+  React.useEffect(() => {
+    setEmails(bundleEmailsByDate(cachedEmails, bundleType))
+  }, [cachedEmails, bundleType])
 
   return (
     <Container component="main" maxWidth="lg">
@@ -133,7 +120,12 @@ const Bundle = ({ title, bundleType, color }) => {
             {period.emails.map((bundle) => (
               <div key={bundle.label}>
                 {bundle.emails.map((e) => (
-                  <EmailViewer key={e.id} item={e} color={color} />
+                  <Email
+                    key={e.id}
+                    item={e}
+                    color={color}
+                    updateEmail={updateEmail}
+                  />
                 ))}
               </div>
             ))}

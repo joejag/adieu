@@ -1,4 +1,4 @@
-const { bundled } = require('./bundler')
+const { byCategory } = require('./byCategory')
 
 test('the bundles', () => {
   const personalsEmail = { id: 0, labelIds: ['CATEGORY_PERSONAL'] }
@@ -6,7 +6,7 @@ test('the bundles', () => {
   const promosEmail = { id: 2, labelIds: ['CATEGORY_PROMOTIONS'] }
   const socialEmail = { id: 3, labelIds: ['CATEGORY_SOCIAL'] }
   const forumEmail = { id: 4, labelIds: ['CATEGORY_FORUMS'] }
-  const otherEmail = { id: 5 }
+  const otherEmail = { id: 5, labelIds: [] }
   const otherCategorisedEmail = { id: 6, labelIds: ['CATEGORY_NEW'] }
   const emails = [
     personalsEmail,
@@ -18,7 +18,7 @@ test('the bundles', () => {
     otherCategorisedEmail,
   ]
 
-  expect(bundled(emails)).toEqual([
+  expect(byCategory(emails)).toEqual([
     {
       label: 'personal',
       emails: [personalsEmail, otherEmail, otherCategorisedEmail],
@@ -35,7 +35,7 @@ test('omit missing', () => {
   const forumEmail = { id: 4, labelIds: ['CATEGORY_FORUMS'] }
   const emails = [personalsEmail, forumEmail]
 
-  expect(bundled(emails)).toEqual([
+  expect(byCategory(emails)).toEqual([
     { label: 'personal', emails: [personalsEmail] },
     { label: 'forum', emails: [forumEmail] },
   ])

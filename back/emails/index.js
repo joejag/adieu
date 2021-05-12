@@ -137,7 +137,9 @@ const fetchEmail = (auth, id, format) => {
             removeLabelIds: ['UNREAD'],
           },
         })
-        .then(() => result)
+        .then(() => {
+          return { ...result, unread: false }
+        })
     })
     .catch((error) => {
       console.error(`problem with ${id}`, error)
@@ -147,22 +149,21 @@ const fetchEmail = (auth, id, format) => {
 const gmailToAdieuMail = (id, data, format) => {
   const threadId = data.threadId
   const snippet = data.snippet
-  const labelIds = data.labelIds
+  const labelIds = data.labelIds || []
   const gmailDate = data.internalDate
-
   const headers = data.payload.headers
+  const unread = data.labelIds.includes('UNREAD')
   const date = headers.filter((h) => h['name'] === 'Date')[0].value
   const to = headers.filter((h) => h['name'] === 'To')[0].value
   const from = headers.filter((h) => h['name'] === 'From')[0].value
   const subject = headers.filter((h) => h['name'] === 'Subject')[0].value
-  const unread = data.labelIds.includes('UNREAD')
 
+  // try and make a human readable version of the sender
   let fromName = from
     .substring(0, from.indexOf('<'))
     .replace('"', '')
     .replace('"', '')
     .trim()
-
   if (from.trim().indexOf('<') === 0) {
     fromName = from.trim().substring(1, from.trim().length - 1)
   }
@@ -211,9 +212,11 @@ exports.gmailToAdieuMail = gmailToAdieuMail
 const findContentType = (currentParts, contentType) => {
   if (currentParts === undefined) return undefined
 
-  const htmlElement = currentParts.find((p) => p['mimeType'] === contentType)
-  if (htmlElement) {
-    return htmlElement
+  const matchingElement = currentParts.find(
+    (p) => p['mimeType'] === contentType
+  )
+  if (matchingElement) {
+    return matchingElement
   }
 
   const subpartWithParts = currentParts.filter((p) => p.parts !== undefined)

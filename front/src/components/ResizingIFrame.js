@@ -1,7 +1,7 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
 
-class FullheightIframe extends React.Component {
+class ResizingIFrame extends React.Component {
   constructor() {
     super()
     this.state = {
@@ -52,4 +52,4 @@ class FullheightIframe extends React.Component {
   }
 }
 
-export default FullheightIframe
+export default ResizingIFrame

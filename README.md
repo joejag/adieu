@@ -1,22 +1,13 @@
 # Top things
 
-- Attachments
-- cache retrieved emails in a global context object
 - load embedded images (1795ab0217072bf4)
+- Add links to text/plain emails
+- Attachments
+- Keyboard shortcuts: up, down, open/close
 
-# If we do Inbox style
+# Nice things
 
-- Keyboard shortcuts: up, down, open/close (done, undo)
-- Mark things as 'done'
-
-# Nice things - small effort
-
-- Take all letters of the name to create Avatar up to three
 - Add icons for common services (github, linkedin, google etc)
-- Add mini-avatars for other folks involved in the email chain
-
-# Nice things - big effort
-
 - Block spy trackers using ublock origin lists
 - Search functionality (messages)
 - Search functionality (contacts)
@@ -24,13 +15,14 @@
 - Add pastebin
 - Create fancy cards for trips
 - spruce up emails, if style is missing add it (like Kent Dodds pre section)
-- Sleeping things
 
 # Probably never
 
 - use WebSockets to look for new mail
 - Tell google to ping when there is a new message
 - send emails
+- Snoozing emails
+- Mark things as 'done'
 
 # Docs
 

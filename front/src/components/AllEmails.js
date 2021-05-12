@@ -4,15 +4,16 @@ import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import { lightBlue } from '@material-ui/core/colors'
 
-import { splitter } from './core/splitter'
-import { bundled } from './core/bundler'
+import { useEmails } from '../emails-context'
+import { allEmailsByDate } from '../core/emails'
+import { fetchEmails } from '../api-client'
 import {
   SocialSummary,
   UpdatesSummary,
   PromosSummary,
   ForumSummary,
-} from './components/summaries'
-import EmailViewer from './components/EmailViewer'
+} from './Summaries'
+import Email from './Email'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,46 +30,26 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.getContrastText(lightBlue[500]),
     backgroundColor: lightBlue[500],
   },
-  emailbody: {
-    width: '100%',
-    height: '100%',
-  },
   rule: {
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
 }))
 
-const App = () => {
+const AllEmails = () => {
   const classes = useStyles()
+  const [cachedEmails, setCachedEmails, updateEmail] = useEmails()
   const [emails, setEmails] = React.useState([])
 
   React.useEffect(() => {
-    const url = `${window.location.origin}/api/emails`
-    fetch(url)
-      .then((res) => {
-        if (res.status === 401) {
-          window.location = `${window.location.origin}/api/login`
-          return []
-        }
-        return res.json()
-      })
-      .then((res) => {
-        const splitEmails = splitter(res)
-        const newSplit = splitEmails.map((period) => {
-          period.emails = bundled(period.emails)
-          return period
-        })
+    if (cachedEmails.length > 0) {
+      return
+    }
+    fetchEmails().then(setCachedEmails)
+  }, [cachedEmails, setCachedEmails])
 
-        setEmails(newSplit)
-
-        // warm up the Lambda
-        const warmup = res.find((e) => !e.unread)
-        if (warmup !== undefined) {
-          const firstEmail = `${window.location.origin}/api/email/${warmup.id}`
-          fetch(firstEmail).then()
-        }
-      })
-  }, [])
+  React.useEffect(() => {
+    setEmails(allEmailsByDate(cachedEmails))
+  }, [cachedEmails])
 
   return (
     <Container component="main" maxWidth="lg">
@@ -90,7 +71,12 @@ const App = () => {
               <div key={bundle.label}>
                 {bundle.label === 'personal' &&
                   bundle.emails.map((e) => (
-                    <EmailViewer key={e.id} item={e} color={classes.personal} />
+                    <Email
+                      key={e.id}
+                      item={e}
+                      color={classes.personal}
+                      updateEmail={updateEmail}
+                    />
                   ))}
                 {bundle.label === 'social' && (
                   <SocialSummary
@@ -125,4 +111,4 @@ const App = () => {
   )
 }
 
-export default App
+export default AllEmails

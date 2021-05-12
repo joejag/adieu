@@ -9,6 +9,7 @@ import PeopleIcon from '@material-ui/icons/People'
 import FlagIcon from '@material-ui/icons/Flag'
 import LocalOfferIcon from '@material-ui/icons/LocalOffer'
 import ForumIcon from '@material-ui/icons/Forum'
+import { useHistory } from 'react-router'
 
 const useStyles = makeStyles((theme) => ({
   social: {
@@ -37,6 +38,7 @@ const SocialSummary = ({ bundle }) => {
       color={classes.social}
       title="Social"
       link="/social"
+      icon={<PeopleIcon fontSize="large" className={classes.social} />}
     ></GenericSummary>
   )
 }
@@ -50,6 +52,7 @@ const UpdatesSummary = ({ bundle }) => {
       color={classes.updates}
       title="Updates"
       link="/updates"
+      icon={<FlagIcon fontSize="large" className={classes.updates} />}
     ></GenericSummary>
   )
 }
@@ -63,6 +66,7 @@ const PromosSummary = ({ bundle }) => {
       color={classes.promos}
       title="Promos"
       link="/promos"
+      icon={<LocalOfferIcon fontSize="large" className={classes.promos} />}
     ></GenericSummary>
   )
 }
@@ -76,14 +80,17 @@ const ForumSummary = ({ bundle }) => {
       color={classes.forum}
       title="Forums"
       link="/forums"
+      icon={<ForumIcon fontSize="large" className={classes.forum} />}
     ></GenericSummary>
   )
 }
 
-const GenericSummary = ({ title, color, bundle, link }) => {
+const GenericSummary = ({ title, color, bundle, link, icon }) => {
+  const routerHistory = useHistory()
+
   const onExpanded = (event, expanded) => {
     if (expanded) {
-      window.location = `${window.location.origin}${link}`
+      routerHistory.push(link)
     }
   }
 
@@ -91,8 +98,8 @@ const GenericSummary = ({ title, color, bundle, link }) => {
     <Accordion onChange={onExpanded}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
-        aria-controls="panel1a-content"
-        id="panel1a-header"
+        aria-controls={`panel-${title}-content`}
+        id={`panel-${title}-header`}
       >
         <Grid
           container
@@ -110,20 +117,7 @@ const GenericSummary = ({ title, color, bundle, link }) => {
             alignItems="center"
             justify="flex-start"
           >
-            <Grid item>
-              {title === 'Social' && (
-                <PeopleIcon fontSize="large" className={color} />
-              )}
-              {title === 'Updates' && (
-                <FlagIcon fontSize="large" className={color} />
-              )}
-              {title === 'Promos' && (
-                <LocalOfferIcon fontSize="large" className={color} />
-              )}
-              {title === 'Forums' && (
-                <ForumIcon fontSize="large" className={color} />
-              )}
-            </Grid>
+            <Grid item>{icon}</Grid>
 
             <Grid item xs zeroMinWidth>
               <Typography className={color}>{title}</Typography>

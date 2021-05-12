@@ -7,34 +7,19 @@ import AccordionDetails from '@material-ui/core/AccordionDetails'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import Avatar from '@material-ui/core/Avatar'
 
-import FullheightIframe from './iframe'
+import ResizingIFrame from './ResizingIFrame'
+import { fetchEmail } from '../api-client'
 
 // Used to make the opening transition less jumpy
 const FAKE_BODY = btoa('<p>&nbsp;</p>'.repeat(20))
 
-const EmailViewer = ({ item, color }) => {
-  const [emailBody, setEmailBody] = React.useState(FAKE_BODY)
-  const [mimeType, setMimeType] = React.useState('')
-  const [fontWeight, setFontWeight] = React.useState(item.unread ? 600 : 400)
+const Email = ({ item, color, updateEmail }) => {
+  const fontWeight = item.unread ? 600 : 400
+  const emailBody = item.emailBody.length ? item.emailBody : FAKE_BODY
 
   const onExpanded = (event, expanded) => {
-    if (expanded) {
-      const url = `${window.location.origin}/api/email/${item.id}`
-      fetch(url)
-        .then((res) => {
-          if (res.status === 401) {
-            window.location = `${window.location.origin}/api/login`
-            return []
-          }
-          return res.json()
-        })
-        .then((res) => {
-          setEmailBody(res.emailBody)
-          setMimeType(res.mimeType)
-          setFontWeight(400)
-        })
-    } else {
-      setEmailBody(FAKE_BODY)
+    if (expanded && item.emailBody.length === 0) {
+      fetchEmail(item.id).then(updateEmail)
     }
   }
 
@@ -42,8 +27,8 @@ const EmailViewer = ({ item, color }) => {
     <Accordion key={item.id} onChange={onExpanded}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
-        aria-controls="panel1a-content"
-        id="panel1a-header"
+        aria-controls={`panel-${item.id}-content`}
+        id={`panel-${item.id}-header`}
       >
         <Grid
           container
@@ -79,9 +64,9 @@ const EmailViewer = ({ item, color }) => {
         </Grid>
       </AccordionSummary>
       <AccordionDetails>
-        <FullheightIframe
+        <ResizingIFrame
           emailbody={emailBody}
-          mimeType={mimeType}
+          mimeType={item.mimeType}
           subject={item.subject}
         />
       </AccordionDetails>
@@ -89,4 +74,4 @@ const EmailViewer = ({ item, color }) => {
   )
 }
 
-export default EmailViewer
+export default Email
