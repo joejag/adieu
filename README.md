@@ -1,3 +1,60 @@
+# Adieu
+
+# Running locally
+
+You will need a Google API app registered first
+
+1. Head over to https://console.cloud.google.com/apis/credentials
+2. Create a New Project called 'Adieu'
+3. Enable the Gmail API inside the "Library".
+4. Create new Credentials. Create credentials > OAuth client ID. Choose Web application application type.
+5. Set the callback URLs to be http://localhost:3000
+6. On the Consent screen, add your email address to the "Trusted Users" section
+7. Once you have the Client id and secret, make sure they work at https://developers.google.com/oauthplayground/
+
+You have to run three things locally:
+
+- React
+- Lambda
+- DynamoDB
+
+I usually run these in three different terminals.
+
+To run React:
+
+```
+cd front && npm install && npm start
+```
+
+To run DynamoDB (this stores the Gmail OAuth tokens):
+
+```
+docker run -p 8000:8000 amazon/dynamodb-local  -jar DynamoDBLocal.jar -sharedDb
+
+```
+
+Then create the Sessions tables in Dynamo using:
+
+```
+ aws dynamodb create-table \
+        --table-name sessions \
+        --attribute-definitions AttributeName=sessionId,AttributeType=S \
+        --key-schema AttributeName=sessionId,KeyType=HASH \
+        --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+        --endpoint-url http://localhost:8000
+```
+
+Finally, edit the `run.sh` script to include your Google CLIENT_ID and CLIENT_SECRET.
+
+Now you can run the Lambda (via Express) with:
+
+```
+./run.sh
+```
+
+Use the app by going to http://localhost:3000
+
+
 # Top things
 
 - load embedded images (1795ab0217072bf4)
