@@ -7,8 +7,8 @@ You will need a Google API app registered first
 1. Head over to https://console.cloud.google.com/apis/credentials
 2. Create a New Project called 'Adieu'
 3. Enable the Gmail API inside the "Library".
-4. Create new Credentials. Create credentials > OAuth client ID. Choose Web application application type.
-5. Set the callback URLs to be http://localhost:3000
+4. Create new Credentials. Create credentials > OAuth client ID. Ignore the scopes.  Choose Web application application type.
+5. Set the callback URLs to be http://localhost:3000/api/callback
 6. On the Consent screen, add your email address to the "Trusted Users" section
 7. Once you have the Client id and secret, make sure they work at https://developers.google.com/oauthplayground/
 
@@ -44,11 +44,17 @@ Then create the Sessions tables in Dynamo using:
         --endpoint-url http://localhost:8000
 ```
 
-Finally, edit the `run.sh` script to include your Google CLIENT_ID and CLIENT_SECRET.
+Finally, set your Google CLIENT_ID and CLIENT_SECRET. There are 2 ways to do this...
+
+* Change the script
+* or make new parameters is SSM parameter store named `/adieu/client-id` and `/adieu/client-secret`
 
 Now you can run the Lambda (via Express) with:
 
 ```
+cd back/local && npm install 
+cd .. && npm install 
+cd ..
 ./run.sh
 ```
 
