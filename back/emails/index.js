@@ -1,5 +1,8 @@
 const { google } = require('googleapis')
-const { DynamoDB } = require('aws-sdk')
+const { DynamoDB, S3 } = require('aws-sdk')
+const { S3RequestPresigner } = require('@aws-sdk/s3-request-presigner')
+const { HttpRequest } = require('@aws-sdk/protocol-http')
+const { Hash } = require('@aws-sdk/hash-node')
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -77,6 +80,84 @@ exports.emailHandler = async (event) => {
       headers: CORS_HEADERS,
     }
   }
+}
+
+exports.attachmentViewHandler = async (event) => {
+  console.log('request:', JSON.stringify(event, undefined, 2))
+
+  if (
+    event.pathParameters == undefined ||
+    event.pathParameters.emailId === undefined ||
+    event.pathParameters.attachmentId === undefined
+  ) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ reason: 'No emailId/attachmentId supplied' }),
+    }
+  }
+
+  try {
+    const { attachment, data } = await fetchAttachment(event)
+
+    const s3 = new S3()
+    const params = {
+      Bucket: process.env.ATTACHMENTS_BUCKET_NAME,
+      Key: attachment.filename,
+      Body: Buffer.from(data, 'base64'),
+    }
+    await s3.upload(params).promise()
+    const url = s3.getSignedUrl('getObject', {
+      Bucket: process.env.ATTACHMENTS_BUCKET_NAME,
+      Key: attachment.filename,
+      Expires: 60 * 30,
+      ResponseContentType: attachment.mimeType,
+    })
+
+    return {
+      statusCode: 302,
+      headers: {
+        ...CORS_HEADERS,
+        Location: url,
+      },
+    }
+  } catch (err) {
+    if (err.message === 'feed me new creds') {
+      return {
+        statusCode: 401,
+        headers: CORS_HEADERS,
+      }
+    }
+
+    console.error('unexpected error', err)
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+    }
+  }
+}
+
+const fetchAttachment = async (event) => {
+  const oauth2Client = await authWithGoogle(event.cookies)
+  const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
+
+  const email = await fetchEmail(
+    oauth2Client,
+    event.pathParameters.emailId,
+    'full'
+  )
+  const attachment = email.attachments.find(
+    (a) => a.id === event.pathParameters.attachmentId
+  )
+
+  const data = await gmail.users.messages.attachments.get({
+    auth: oauth2Client,
+    userId: 'me',
+    messageId: event.pathParameters.emailId,
+    id: attachment.unstableId,
+  })
+
+  return { data: data.data.data, attachment: attachment }
 }
 
 const authWithGoogle = async (cookies) => {
@@ -191,10 +272,9 @@ const gmailToAdieuMail = (id, data, format) => {
     }
   }
 
-  if (id === '1793b9c747dac319') {
-    // console.log(data)
-    console.log(data.payload)
-  }
+  // if (id === '179564361da33a97') {
+  //   console.log(data.payload)
+  // }
 
   return {
     id,
@@ -229,7 +309,8 @@ const findAttachments = (currentParts) => {
   return parts.map((p) => {
     return {
       filename: p.filename,
-      id: p.body.attachmentId,
+      id: p.partId,
+      unstableId: p.body.attachmentId,
       mimeType: p.mimeType,
     }
   })
@@ -259,7 +340,7 @@ const fetchEmails = async (auth) => {
     const emailIds = await gmail.users.messages.list({
       auth,
       userId: 'me',
-      maxResults: 100,
+      maxResults: 50,
       q: 'NOT label:SENT',
     })
 

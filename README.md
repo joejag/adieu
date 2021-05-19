@@ -58,7 +58,7 @@ Use the app by going to http://localhost:3000
 # Top things
 
 - load embedded images (1795ab0217072bf4)
-- Attachments
+- Attachments (S3: https://aws.amazon.com/blogs/developer/generate-presigned-url-modular-aws-sdk-javascript/)
 - Keyboard shortcuts: up, down, open/close
 - unsub (1795ab0217072bf4)
 

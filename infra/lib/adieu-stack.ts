@@ -37,7 +37,7 @@ export class AdieuAPIStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     })
 
-    const login = new lambda.Function(this, 'LoginHandler', {
+    const loginHandler = new lambda.Function(this, 'LoginHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back/build/login'),
       handler: 'index.loginHandler',
@@ -49,9 +49,9 @@ export class AdieuAPIStack extends cdk.Stack {
         SESSIONS_TABLE_NAME: table.tableName,
       },
     })
-    table.grantReadWriteData(login)
+    table.grantReadWriteData(loginHandler)
 
-    const callback = new lambda.Function(this, 'CallbackHandler', {
+    const loginCallbackHandler = new lambda.Function(this, 'CallbackHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back/build/login'),
       handler: 'index.callbackHandler',
@@ -64,9 +64,9 @@ export class AdieuAPIStack extends cdk.Stack {
         SESSIONS_TABLE_NAME: table.tableName,
       },
     })
-    table.grantReadWriteData(callback)
+    table.grantReadWriteData(loginCallbackHandler)
 
-    const emails = new lambda.Function(this, 'EmailsHandler', {
+    const emailsHandler = new lambda.Function(this, 'EmailsHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back/build/emails'),
       handler: 'index.emailsHandler',
@@ -79,9 +79,9 @@ export class AdieuAPIStack extends cdk.Stack {
         SESSIONS_TABLE_NAME: table.tableName,
       },
     })
-    table.grantReadWriteData(emails)
+    table.grantReadWriteData(emailsHandler)
 
-    const email = new lambda.Function(this, 'EmailHandler', {
+    const emailHandler = new lambda.Function(this, 'EmailHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('../back/build/emails'),
       handler: 'index.emailHandler',
@@ -94,22 +94,56 @@ export class AdieuAPIStack extends cdk.Stack {
         SESSIONS_TABLE_NAME: table.tableName,
       },
     })
-    table.grantReadWriteData(email)
+    table.grantReadWriteData(emailHandler)
+
+    const attachmentsBucket = new s3.Bucket(this, 'AttachmentsBucket', {
+      lifecycleRules: [
+        {
+          expiration: Duration.days(30),
+        },
+      ],
+    })
+    const viewAttachmentHandler = new lambda.Function(
+      this,
+      'AttachmentViewHandler',
+      {
+        runtime: lambda.Runtime.NODEJS_12_X,
+        code: lambda.Code.fromAsset('../back/build/emails'),
+        handler: 'index.attachmentViewHandler',
+        timeout: Duration.seconds(30),
+        memorySize: 512,
+        environment: {
+          CLIENT_ID: clientId,
+          CLIENT_SECRET: clientSecret,
+          CLIENT_REDIRECT: clientRedirect,
+          SESSIONS_TABLE_NAME: table.tableName,
+          ATTACHMENTS_BUCKET_NAME: attachmentsBucket.bucketName,
+        },
+      }
+    )
+    table.grantReadWriteData(viewAttachmentHandler)
+    attachmentsBucket.grantReadWrite(viewAttachmentHandler)
 
     this.httpApi = new apigw.HttpApi(this, 'ApiGateway')
     this.httpApi.addRoutes({
       path: '/api/emails',
       methods: [apigw.HttpMethod.GET],
       integration: new LambdaProxyIntegration({
-        handler: emails,
+        handler: emailsHandler,
       }),
     })
-
     this.httpApi.addRoutes({
       path: '/api/email/{emailId}',
       methods: [apigw.HttpMethod.GET],
       integration: new LambdaProxyIntegration({
-        handler: email,
+        handler: emailHandler,
+      }),
+    })
+    this.httpApi.addRoutes({
+      path: '/api/email/{emailId}/attachment/{attachmentId}',
+      methods: [apigw.HttpMethod.GET],
+      integration: new LambdaProxyIntegration({
+        handler: viewAttachmentHandler,
       }),
     })
 
@@ -117,7 +151,7 @@ export class AdieuAPIStack extends cdk.Stack {
       path: '/api/login',
       methods: [apigw.HttpMethod.GET],
       integration: new LambdaProxyIntegration({
-        handler: login,
+        handler: loginHandler,
       }),
     })
 
@@ -125,7 +159,7 @@ export class AdieuAPIStack extends cdk.Stack {
       path: '/api/callback',
       methods: [apigw.HttpMethod.GET],
       integration: new LambdaProxyIntegration({
-        handler: callback,
+        handler: loginCallbackHandler,
       }),
     })
   }

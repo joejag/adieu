@@ -1,7 +1,9 @@
 var AWS = require('aws-sdk')
 AWS.config.update({
   region: 'local',
-  endpoint: 'http://localhost:8000', // for Dynamo
+  // endpoint: 'http://localhost:8000', // for Dynamo
+  endpoint: 'http://localhost:4566',
+  s3ForcePathStyle: true,
 })
 const express = require('express')
 const { createProxyMiddleware } = require('http-proxy-middleware')
@@ -17,6 +19,7 @@ const lambdas = {
   '/api/callback': loginH.callbackHandler,
   '/api/emails': emailH.emailsHandler,
   '/api/email/:emailId': emailH.emailHandler,
+  '/api/email/:emailId/attachment/:attachmentId': emailH.attachmentViewHandler,
 }
 for (const [route, handler] of Object.entries(lambdas)) {
   app.get(route, (req, res) => {
@@ -31,7 +34,14 @@ for (const [route, handler] of Object.entries(lambdas)) {
         for (const [key, value] of Object.entries(res2.headers)) {
           res.set(key, value)
         }
-        res.status(res2.statusCode).send(res2.body)
+
+        let body = res2.body
+
+        if (res2.isBase64Encoded) {
+          body = Buffer.from(body, 'base64')
+        }
+
+        res.status(res2.statusCode).send(body)
       })
       .catch((err) => {
         console.error(err)

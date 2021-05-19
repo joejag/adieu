@@ -68,7 +68,7 @@ const Email = ({ item, color, updateEmail }) => {
         <Grid container spacing={2} direction="column">
           <Grid item>
             {item.attachments.map((a) => (
-              <AttachmentCard key={a.id} item={a} />
+              <AttachmentCard key={a.id} messageId={item.id} item={a} />
             ))}
           </Grid>
           <Grid item>

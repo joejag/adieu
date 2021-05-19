@@ -4,6 +4,7 @@ set -eu
 export CLIENT_ID="$(aws ssm get-parameter --name '/adieu/client-id' --query 'Parameter.Value' --output text)"
 export CLIENT_SECRET="$(aws ssm get-parameter --name '/adieu/client-secret' --query 'Parameter.Value' --output text)"
 
+export ATTACHMENTS_BUCKET_NAME='bob'
 export SESSIONS_TABLE_NAME="sessions"
 export ADIEU_HOMEPAGE="http://localhost:3000"
 export CLIENT_REDIRECT="http://localhost:3000/api/callback"
@@ -15,7 +16,7 @@ function go_dynamo() {
         --attribute-definitions AttributeName=sessionId,AttributeType=S \
         --key-schema AttributeName=sessionId,KeyType=HASH \
         --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-        --endpoint-url http://localhost:8000
+        --endpoint-url http://localhost:4566
 }
 
 # (cd front && npm start &)
